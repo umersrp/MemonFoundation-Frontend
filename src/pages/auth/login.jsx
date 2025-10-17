@@ -20,11 +20,11 @@ const Login = () => {
         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center px-12">
           <div className="text-white text-left">
             <h1 className="text-4xl font-bold mb-4 leading-snug bg-gradient-to-r from-[#94ffed] to-[#1e816e] text-transparent bg-clip-text">
-              Welcome to CarbonX
+              Welcome to SrpTechs
             </h1>
 
             <p className="text-lg opacity-90">
-              Your one-stop platform for tracking, analyzing, and reducing carbon emissions.
+              Your one-stop platform for tracking, analyzing, and reducing SrpTechs.
             </p>
           </div>
         </div>
@@ -38,7 +38,7 @@ const Login = () => {
               <img src={isDark ? LogoWhite : Logo} alt="Logo" className="mx-auto h-28" />
             </Link>
             <h2 className="mt-6 text-2xl font-bold text-slate-800 dark:text-white">
-              Sign in to your CarbonX account
+              Sign in to your SrpTechs account
             </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400">
               Manage your company’s carbon footprint with ease
@@ -53,15 +53,15 @@ const Login = () => {
 
           {/* <Social /> */}
 
-          {/* <div className="text-center text-sm text-slate-500 dark:text-slate-400">
+          <div className="text-center text-sm text-slate-500 dark:text-slate-400">
             Don’t have an account?{" "}
             <Link
-              to="/register"
+              to="/Registration"
               className="text-primary-600 dark:text-primary-400 hover:underline font-medium"
             >
-              Sign up
+              Registration
             </Link>
-          </div> */}
+          </div>
         </div>
 
         <footer className="mt-10 text-xs text-center text-blue-600 dark:text-green-700">

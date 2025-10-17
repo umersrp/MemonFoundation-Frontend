@@ -1,14 +1,3 @@
-// import React from 'react'
-
-// function Discounttable() {
-//   return (
-//     <div>Discount-table</div>
-//   )
-// }
-
-// export default Discounttable
-
-
 import React, { useState, useMemo, useEffect } from "react";
 import Card from "@/components/ui/Card";
 import Icon from "@/components/ui/Icon";
@@ -17,10 +6,8 @@ import Button from "@/components/ui/Button";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import Logo from "../assets/images/logo/SrpLogo.png"
-
+import Logo from "../assets/images/logo/SrpLogo.png";
 import Tippy from '@tippyjs/react';
-
 import {
     useTable,
     useRowSelect,
@@ -33,6 +20,7 @@ import { useSelector } from "react-redux";
 import Icons from "@/components/ui/Icon";
 import Header from "@/components/partials/header";
 import GlobalFilter from "@/pages/table/react-tables/GlobalFilter";
+import Select from "@/components/ui/Select";
 
 const IndeterminateCheckbox = React.forwardRef(
     ({ indeterminate, ...rest }, ref) => {
@@ -56,7 +44,579 @@ const IndeterminateCheckbox = React.forwardRef(
     }
 );
 
+// Office Info Modal Component
+// Office Info Modal Component
+const OfficeInfoModal = ({ isOpen, onClose, studentId, studentData }) => {
+    const [loading, setLoading] = useState(false);
+    const [form, setForm] = useState({
+        jamaatName: "",
+        membershipNumber: "",
+        belongsToJamaat: "None",
+        supportProvided: "No Support",
+        zakatDeserving: false,
+        authorizedSignature: {
+            name: "",
+            designation: "",
+            stamp: "",
+        },
+        channelOfSubmission: "Other", // Set default value
+        memfOffice: {
+            studentCode: "",
+            assessmentDate: "",
+            interviewDate: "",
+            decision: "Hold", // Set default value
+            category: "SEED", // Set default value
+            scholarship: {
+                grantedFor: [],
+                totalAmount: 0,
+            },
+            panelComments: "",
+            reviewPanelSignature: {
+                name: "",
+                designation: "",
+                stamp: "",
+            },
+        },
+    });
 
+    // Load existing data if available
+    useEffect(() => {
+        if (studentData?.officeUseInfo) {
+            const officeData = studentData.officeUseInfo;
+            setForm({
+                jamaatName: officeData.jamaatName || "",
+                membershipNumber: officeData.membershipNumber || "",
+                belongsToJamaat: officeData.belongsToJamaat || "None",
+                supportProvided: officeData.supportProvided || "No Support",
+                zakatDeserving: officeData.zakatDeserving || false,
+                authorizedSignature: {
+                    name: officeData.authorizedSignature?.name || "",
+                    designation: officeData.authorizedSignature?.designation || "",
+                    stamp: officeData.authorizedSignature?.stamp || "",
+                },
+                // Use existing value or default to "Other"
+                channelOfSubmission: officeData.channelOfSubmission || "Other",
+                memfOffice: {
+                    studentCode: officeData.memfOffice?.studentCode || "",
+                    assessmentDate: officeData.memfOffice?.assessmentDate ?
+                        new Date(officeData.memfOffice.assessmentDate).toISOString().split('T')[0] : "",
+                    interviewDate: officeData.memfOffice?.interviewDate ?
+                        new Date(officeData.memfOffice.interviewDate).toISOString().split('T')[0] : "",
+                    // Use existing value or default to "Hold"
+                    decision: officeData.memfOffice?.decision || "Hold",
+                    // Use existing value or default to "SEED"
+                    category: officeData.memfOffice?.category || "SEED",
+                    scholarship: {
+                        grantedFor: officeData.memfOffice?.scholarship?.grantedFor || [],
+                        totalAmount: officeData.memfOffice?.scholarship?.totalAmount || 0,
+                    },
+                    panelComments: officeData.memfOffice?.panelComments || "",
+                    reviewPanelSignature: {
+                        name: officeData.memfOffice?.reviewPanelSignature?.name || "",
+                        designation: officeData.memfOffice?.reviewPanelSignature?.designation || "",
+                        stamp: officeData.memfOffice?.reviewPanelSignature?.stamp || "",
+                    },
+                },
+            });
+        } else {
+            // Reset to default values with proper enum defaults
+            setForm({
+                jamaatName: "",
+                membershipNumber: "",
+                belongsToJamaat: "None",
+                supportProvided: "No Support",
+                zakatDeserving: false,
+                authorizedSignature: {
+                    name: "",
+                    designation: "",
+                    stamp: "",
+                },
+                channelOfSubmission: "Other", // Default value
+                memfOffice: {
+                    studentCode: "",
+                    assessmentDate: "",
+                    interviewDate: "",
+                    decision: "Hold", // Default value
+                    category: "SEED", // Default value
+                    scholarship: {
+                        grantedFor: [],
+                        totalAmount: 0,
+                    },
+                    panelComments: "",
+                    reviewPanelSignature: {
+                        name: "",
+                        designation: "",
+                        stamp: "",
+                    },
+                },
+            });
+        }
+    }, [studentData, isOpen]);
+
+    const setField = (path, value) => {
+        if (!path.includes(".")) {
+            setForm(prev => ({ ...prev, [path]: value }));
+            return;
+        }
+        const parts = path.split(".");
+        setForm(prev => {
+            const copy = JSON.parse(JSON.stringify(prev));
+            let cur = copy;
+            for (let i = 0; i < parts.length - 1; i++) {
+                cur = cur[parts[i]];
+            }
+            cur[parts[parts.length - 1]] = value;
+            return copy;
+        });
+    };
+
+    // Handle grantedFor array (convert comma-separated string to array)
+    const handleGrantedForChange = (value) => {
+        const grantedForArray = value.split(',').map(item => item.trim()).filter(item => item);
+        setField("memfOffice.scholarship.grantedFor", grantedForArray);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+
+        try {
+            // Prepare data for API - ensure proper formatting with default values
+            const submitData = {
+                officeUseInfo: {
+                    ...form,
+                    // Ensure enum fields have proper values
+                    channelOfSubmission: form.channelOfSubmission || "Other",
+                    memfOffice: {
+                        ...form.memfOffice,
+                        // Ensure enum fields have proper values
+                        decision: form.memfOffice.decision || "Hold",
+                        category: form.memfOffice.category || "SEED",
+                        assessmentDate: form.memfOffice.assessmentDate || null,
+                        interviewDate: form.memfOffice.interviewDate || null,
+                        scholarship: {
+                            grantedFor: Array.isArray(form.memfOffice.scholarship.grantedFor)
+                                ? form.memfOffice.scholarship.grantedFor
+                                : [],
+                            totalAmount: Number(form.memfOffice.scholarship.totalAmount) || 0,
+                        }
+                    }
+                }
+            };
+
+            console.log('Submitting data:', JSON.stringify(submitData, null, 2));
+
+            const response = await axios.put(
+                `${process.env.REACT_APP_BASE_URL}/installment-plans/${studentId}/office-info`,
+                submitData,
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+
+            toast.success("Office information updated successfully");
+            onClose();
+        } catch (error) {
+            console.error("Failed to update office info:", error);
+            console.error("Error details:", error.response?.data);
+            toast.error(error?.response?.data?.message || "Failed to update office information");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-blue-900/20 backdrop-blur-sm p-4">
+            <button
+                        onClick={onClose}
+                        className="text-gray-500 hover:text-gray-700"
+                    >
+                        <Icon icon="heroicons:x-mark" className="w-6 h-6" />
+                    </button>
+            <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[70vh] overflow-auto">
+                <div className="flex items-center justify-between p-6 border-b">
+                    <h3 className="text-xl font-bold">
+                        Office Information - {studentData?.name || 'Student'}
+                    </h3>
+                    <button
+                        onClick={onClose}
+                        className="text-red-500 hover:text-red-700"
+                    >
+                        <Icon icon="heroicons:x-mark" className="w-6 h-6" />
+                    </button>
+                </div>
+
+                <form onSubmit={handleSubmit} className="p-6">
+                    <Card title="SECTION C: (For Office Use)" className="mb-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+                            {/* Jamaat & Membership */}
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Jamaat Name</label>
+                                <input
+                                    placeholder="Jamaat Name"
+                                    value={form.jamaatName}
+                                    onChange={(e) => setField("jamaatName", e.target.value)}
+                                    className="w-full border rounded p-2 border-gray-200"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Membership Number</label>
+                                <input
+                                    placeholder="Membership Number"
+                                    value={form.membershipNumber}
+                                    onChange={(e) => setField("membershipNumber", e.target.value)}
+                                    className="w-full border rounded p-2 border-gray-200"
+                                />
+                            </div>
+
+                            {/* Belongs To Jamaat */}
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Belongs To Jamaat</label>
+                                <Select
+                                    options={[
+                                        { value: "None", label: "None" },
+                                        { value: "Mother", label: "Mother" },
+                                        { value: "Father", label: "Father" },
+                                        { value: "Both", label: "Both" },
+                                    ]}
+                                    value={{
+                                        value: form.belongsToJamaat,
+                                        label: form.belongsToJamaat
+                                    }}
+                                    onChange={(selected) =>
+                                        setField("belongsToJamaat", selected?.value || "None")
+                                    }
+                                    placeholder="Select"
+                                />
+                            </div>
+
+                            {/* Support Provided */}
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Support Provided</label>
+                                <Select
+                                    options={[
+                                        { value: "No Support", label: "No Support" },
+                                        { value: "Course and Uniform", label: "Course and Uniform" },
+                                    ]}
+                                    value={{
+                                        value: form.supportProvided,
+                                        label: form.supportProvided
+                                    }}
+                                    onChange={(selected) =>
+                                        setField("supportProvided", selected?.value || "No Support")
+                                    }
+                                    placeholder="Select"
+                                />
+                            </div>
+
+                            {/* Zakat Deserving */}
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    checked={form.zakatDeserving}
+                                    onChange={(e) =>
+                                        setField("zakatDeserving", e.target.checked)
+                                    }
+                                    className="h-5 w-5"
+                                />
+                                <label className="text-sm font-medium">Zakat Deserving</label>
+                            </div>
+
+                            {/* Channel of Submission */}
+                            <div>
+                                <label className="block text-sm font-medium mb-1">
+                                    Channel of Submission
+                                </label>
+                                <Select
+                                    options={[
+                                        {
+                                            value: "All Pakistan Memon Federation",
+                                            label: "All Pakistan Memon Federation",
+                                        },
+                                        { value: "World Memon Organization", label: "World Memon Organization" },
+                                        {
+                                            value: "The Pakistan Memon Educational & Welfare Society (Sir Adamjee Institute)",
+                                            label: "The Pakistan Memon Educational & Welfare Society (Sir Adamjee Institute)",
+                                        },
+                                        { value: "Other", label: "Other" },
+                                    ]}
+                                    value={
+                                        form.channelOfSubmission
+                                            ? {
+                                                value: form.channelOfSubmission,
+                                                label: form.channelOfSubmission,
+                                            }
+                                            : { value: "Other", label: "Other" } // Default value
+                                    }
+                                    onChange={(selected) =>
+                                        setField("channelOfSubmission", selected?.value || "Other")
+                                    }
+                                    placeholder="Select Channel"
+                                />
+                            </div>
+
+                            {/* Authorized Signature */}
+                            <div className="md:col-span-2">
+                                <h4 className="font-semibold mt-4 mb-1">Authorized Signature</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Name</label>
+                                        <input
+                                            placeholder="Name"
+                                            value={form.authorizedSignature.name}
+                                            onChange={(e) =>
+                                                setField("authorizedSignature.name", e.target.value)
+                                            }
+                                            className="border rounded p-2 border-gray-200 w-full"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Designation</label>
+                                        <input
+                                            placeholder="Designation"
+                                            value={form.authorizedSignature.designation}
+                                            onChange={(e) =>
+                                                setField(
+                                                    "authorizedSignature.designation",
+                                                    e.target.value
+                                                )
+                                            }
+                                            className="border rounded p-2 border-gray-200 w-full"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Stamp</label>
+                                        <input
+                                            placeholder="Stamp (URL / Base64)"
+                                            value={form.authorizedSignature.stamp}
+                                            onChange={(e) =>
+                                                setField("authorizedSignature.stamp", e.target.value)
+                                            }
+                                            className="border rounded p-2 border-gray-200 w-full"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* MEMF Office Info */}
+                            <div className="md:col-span-2 mt-4 border-t pt-3">
+                                <h4 className="font-semibold mb-2">MEMF Office Info</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Student Code</label>
+                                        <input
+                                            placeholder="Student Code"
+                                            value={form.memfOffice.studentCode}
+                                            onChange={(e) =>
+                                                setField("memfOffice.studentCode", e.target.value)
+                                            }
+                                            className="border rounded p-2 border-gray-200 w-full"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Assessment Date</label>
+                                        <input
+                                            type="date"
+                                            placeholder="Assessment Date"
+                                            value={form.memfOffice.assessmentDate}
+                                            onChange={(e) =>
+                                                setField("memfOffice.assessmentDate", e.target.value)
+                                            }
+                                            className="border rounded p-2 border-gray-200 w-full"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Interview Date</label>
+                                        <input
+                                            type="date"
+                                            placeholder="Interview Date"
+                                            value={form.memfOffice.interviewDate}
+                                            onChange={(e) =>
+                                                setField("memfOffice.interviewDate", e.target.value)
+                                            }
+                                            className="border rounded p-2 border-gray-200 w-full"
+                                        />
+                                    </div>
+
+                                    {/* Decision */}
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Decision</label>
+                                        <Select
+                                            options={[
+                                                { value: "Approve", label: "Approve" },
+                                                { value: "Hold", label: "Hold" },
+                                                { value: "Regret", label: "Regret" },
+                                            ]}
+                                            value={
+                                                form.memfOffice.decision
+                                                    ? {
+                                                        value: form.memfOffice.decision,
+                                                        label: form.memfOffice.decision,
+                                                    }
+                                                    : { value: "Hold", label: "Hold" } // Default value
+                                            }
+                                            onChange={(selected) =>
+                                                setField("memfOffice.decision", selected?.value || "Hold")
+                                            }
+                                            placeholder="Select Decision"
+                                        />
+                                    </div>
+
+                                    {/* Category */}
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Category</label>
+                                        <Select
+                                            options={[
+                                                { value: "STAR", label: "STAR" },
+                                                { value: "HOPE", label: "HOPE" },
+                                                { value: "SEED", label: "SEED" },
+                                            ]}
+                                            value={
+                                                form.memfOffice.category
+                                                    ? {
+                                                        value: form.memfOffice.category,
+                                                        label: form.memfOffice.category,
+                                                    }
+                                                    : { value: "SEED", label: "SEED" } // Default value
+                                            }
+                                            onChange={(selected) =>
+                                                setField("memfOffice.category", selected?.value || "SEED")
+                                            }
+                                            placeholder="Select Category"
+                                        />
+                                    </div>
+
+                                    {/* Scholarship Fields */}
+                                    <div className="md:col-span-2 mt-2">
+                                        <h4 className="font-semibold mb-1">Scholarship</h4>
+                                        <div className="space-y-2">
+                                            <div>
+                                                <label className="block text-sm font-medium mb-1">
+                                                    Granted For (comma-separated)
+                                                </label>
+                                                <input
+                                                    placeholder="Monthly Fee, Books, Uniform, etc."
+                                                    value={Array.isArray(form.memfOffice.scholarship.grantedFor)
+                                                        ? form.memfOffice.scholarship.grantedFor.join(', ')
+                                                        : ''}
+                                                    onChange={(e) => handleGrantedForChange(e.target.value)}
+                                                    className="border rounded p-2 border-gray-200 w-full"
+                                                />
+                                                <p className="text-xs text-gray-500 mt-1">
+                                                    Separate multiple items with commas
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium mb-1">Total Amount</label>
+                                                <input
+                                                    type="number"
+                                                    placeholder="Total Amount"
+                                                    value={form.memfOffice.scholarship.totalAmount}
+                                                    onChange={(e) =>
+                                                        setField(
+                                                            "memfOffice.scholarship.totalAmount",
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    className="border rounded p-2 border-gray-200 w-full"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Panel Comments */}
+                                    <div className="md:col-span-2">
+                                        <label className="block text-sm font-medium mb-1">Panel Comments</label>
+                                        <textarea
+                                            placeholder="Panel Comments"
+                                            value={form.memfOffice.panelComments}
+                                            onChange={(e) =>
+                                                setField("memfOffice.panelComments", e.target.value)
+                                            }
+                                            className="border rounded p-2 border-gray-200 w-full"
+                                            rows="3"
+                                        />
+                                    </div>
+
+                                    {/* Review Panel Signature */}
+                                    <div className="md:col-span-2 mt-2">
+                                        <h4 className="font-semibold mb-1">Review Panel Signature</h4>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                            <div>
+                                                <label className="block text-sm font-medium mb-1">Name</label>
+                                                <input
+                                                    placeholder="Name"
+                                                    value={form.memfOffice.reviewPanelSignature.name}
+                                                    onChange={(e) =>
+                                                        setField(
+                                                            "memfOffice.reviewPanelSignature.name",
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    className="border rounded p-2 border-gray-200 w-full"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium mb-1">Designation</label>
+                                                <input
+                                                    placeholder="Designation"
+                                                    value={form.memfOffice.reviewPanelSignature.designation}
+                                                    onChange={(e) =>
+                                                        setField(
+                                                            "memfOffice.reviewPanelSignature.designation",
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    className="border rounded p-2 border-gray-200 w-full"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium mb-1">Stamp</label>
+                                                <input
+                                                    placeholder="Stamp (URL / Base64)"
+                                                    value={form.memfOffice.reviewPanelSignature.stamp}
+                                                    onChange={(e) =>
+                                                        setField(
+                                                            "memfOffice.reviewPanelSignature.stamp",
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    className="border rounded p-2 border-gray-200 w-full"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </Card>
+
+                    <div className="flex justify-end gap-3 mt-6">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                        >
+                            Cancel
+                        </button>
+                        <Button
+                            type="submit"
+                            text={loading ? "Saving..." : "Save Office Information"}
+                            className="btn-dark"
+                            isLoading={loading}
+                            disabled={loading}
+                        />
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
 
 const StudentTable = () => {
     const navigate = useNavigate();
@@ -65,8 +625,9 @@ const StudentTable = () => {
     const [pageSize, setPageSize] = useState(10);
     const [loading, setLoading] = useState(false);
     const [pageCount, setPageCount] = useState(0);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedStudent, setSelectedStudent] = useState(null);
     const user = useSelector((state) => state.auth.user);
-
 
     const fetchData = async () => {
         setLoading(true);
@@ -81,11 +642,10 @@ const StudentTable = () => {
                 },
             });
 
-            await new Promise(resolve => setTimeout(resolve, 600)); // Add small delay
-
+            await new Promise(resolve => setTimeout(resolve, 600));
 
             setUserData(response.data.data.students);
-            setTotalPages(response.data.meta?.totalPages || 1);
+            setPageCount(response.data.meta?.totalPages || 1);
         } catch (error) {
             console.error(error);
         } finally {
@@ -99,7 +659,7 @@ const StudentTable = () => {
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`${process.env.REACT_APP_BASE_URL}/sector/Delete/${id}`, {
+            await axios.delete(`${process.env.REACT_APP_BASE_URL}/user/admin-remove/${id}`, {
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -120,16 +680,27 @@ const StudentTable = () => {
                 { isActive: !currentStatus },
                 {
                     headers: {
-                        Authorization: `${localStorage.getItem("token")}`,
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
                     },
                 }
             );
             toast.success(response?.data?.message || "Status updated");
-            fetchData(); // Refresh table
+            fetchData();
         } catch (error) {
             console.error("Status toggle failed:", error);
             toast.error(error?.response?.data?.message || "Failed to update status");
         }
+    };
+
+    const handleOpenOfficeModal = (student) => {
+        setSelectedStudent(student);
+        setModalOpen(true);
+    };
+
+    const handleCloseOfficeModal = () => {
+        setModalOpen(false);
+        setSelectedStudent(null);
+        fetchData(); // Refresh data to show any updates
     };
 
     const COLUMNS = [
@@ -182,6 +753,11 @@ const StudentTable = () => {
             Cell: ({ cell, row }) => {
                 const studentId = cell.value;
                 const isActive = row.original.isActive;
+                const studentData = row.original;
+
+                // Check if office use scholarship is filled
+                const hasOfficeInfo = studentData?.officeUseInfo?.memfOffice?.scholarship?.grantedFor?.length > 0 ||
+                    studentData?.officeUseInfo?.memfOffice?.scholarship?.totalAmount > 0;
 
                 return (
                     <div className="flex items-center space-x-3 rtl:space-x-reverse">
@@ -189,7 +765,7 @@ const StudentTable = () => {
                         <Tippy content="View">
                             <button
                                 className="action-btn"
-                                onClick={() => navigate(`/Sector-View/${studentId}`)}
+                                onClick={() => navigate(`/StudentView/${studentId}`)}
                             >
                                 <Icon className="text-green-600" icon="heroicons:eye" />
                             </button>
@@ -199,11 +775,23 @@ const StudentTable = () => {
                         <Tippy content="Edit">
                             <button
                                 className="action-btn"
-                                onClick={() => navigate(`/Add-Sector-Edit/${studentId}`)}
+                                onClick={() => navigate(`/Student/${studentId}`)}
                             >
                                 <Icon className="text-blue-600" icon="heroicons:pencil-square" />
                             </button>
                         </Tippy>
+
+                        {/* 🏢 Office Info - Only show if scholarship is NOT filled */}
+                        {!hasOfficeInfo && (
+                            <Tippy content="Office Information">
+                                <button
+                                    className="action-btn"
+                                    onClick={() => handleOpenOfficeModal(studentData)}
+                                >
+                                    <Icon className="text-purple-600" icon="heroicons:building-office" />
+                                </button>
+                            </Tippy>
+                        )}
 
                         {/* 🗑️ Delete */}
                         <Tippy content="Delete">
@@ -229,8 +817,7 @@ const StudentTable = () => {
                     </div>
                 );
             },
-        },
-
+        }
     ];
 
     const columns = useMemo(() => COLUMNS, []);
@@ -301,18 +888,17 @@ const StudentTable = () => {
                 <div className="md:flex pb-6 items-center">
                     <h6 className="flex-1 md:mb-0 mb-3">Student</h6>
                     <div className="md:flex md:space-x-3 items-center flex-none rtl:space-x-reverse">
-                        <GlobalFilter filter={globalFilter} setFilter={setGlobalFilter} />
 
-                        {/* <Button
+                        <GlobalFilter filter={globalFilter} setFilter={setGlobalFilter} />
+                        <Button
                             icon="heroicons-outline:plus-sm"
-                            text="Add Sector"
+                            text="Add student"
                             className="btn font-normal btn-sm bg-gradient-to-r from-[#3AB89D] to-[#3A90B8] text-white border-0 hover:opacity-90"
                             iconClass="text-lg"
                             onClick={() => {
-                                navigate("/Add-Sector-Form");
+                                navigate("/Student-Registration");
                             }}
-                        /> */}
-
+                        />
                     </div>
                 </div>
                 <div className="overflow-x-auto -mx-6">
@@ -465,6 +1051,13 @@ const StudentTable = () => {
                 </div>
             </Card>
 
+            {/* Office Info Modal */}
+            <OfficeInfoModal
+                isOpen={modalOpen}
+                onClose={handleCloseOfficeModal}
+                studentId={selectedStudent?._id}
+                studentData={selectedStudent}
+            />
         </>
     );
 };

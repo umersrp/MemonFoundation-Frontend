@@ -173,6 +173,14 @@ export const menuItems = [
     link: "Student",
   },
 
+  {
+    title: "Installment Plan",
+    isHide: true,
+    icon: "heroicons-outline:user-group",
+    link: "Installment-Plan",
+  },
+  
+
   // {
   //   title: "Authentication",
   //   icon: "heroicons-outline:lock-closed",

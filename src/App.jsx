@@ -207,6 +207,9 @@ import BuildingTable from "./Carbonx-pages/Building/Buidingtable";
 import StudentTable from "./Memon-foundation/StudentTable";
 import SetPassword from "./pages/auth/Setup-Password";
 import StudentRegistrationForm from "./Memon-foundation/RegisterForm";
+import Installment from "./Memon-foundation/Installment/InstallemntTable";
+import StudentEdit from "./Memon-foundation/StudentEdit";
+import StudentView from "./Memon-foundation/StudentView";
 
 
 function App() {
@@ -310,10 +313,6 @@ function App() {
           <Route path="customer-view" element={<Customerview />} />
           <Route path="vendor-view" element={<Vendorview />} />
           <Route path="mapl" element={<OpenStreetMapEmbed />} />
-
-
-
-
           <Route path="product-preview" element={<ProductPreviewPage />} />
           <Route path="product-edit" element={<ProductEditPage />} />
           <Route path="invoice-preview" element={<InvoicePreviewPage />} />
@@ -408,37 +407,16 @@ function App() {
           <Route path="Building-Form/:id" element={<BuildingFormPage />} />
           <Route path="Building" element={<BuildingTable />} />
           <Route path="Student" element={<StudentTable />} />
+          <Route path="Student/:id" element={<StudentEdit />} />
+          <Route path="StudentView/:id" element={<StudentView />} />
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+          <Route path="Student-Registration" element={<StudentRegistrationForm />} />
+          <Route path="Installment-Plan" element={<Installment />} />
 
 
           <Route path="Coach-edit" element={<CoachEditPage />} />
-
-
-
-
-
-
           <Route path="*" element={<Navigate to="/404" />} />
         </Route>
         <Route path="Registration" element={<StudentRegistrationForm />} />

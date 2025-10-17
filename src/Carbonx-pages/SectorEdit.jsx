@@ -24,7 +24,7 @@ const SectorEdit = () => {
             try {
                 setLoading(true);
                 const response = await axios.get(
-                    `${process.env.REACT_APP_BASE_URL}/sector/sector/${id}`,
+                    `${process.env.REACT_APP_BASE_URL}/user/user/${id}`,
                     {
                         headers: {
                             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -34,8 +34,8 @@ const SectorEdit = () => {
 
                 if (response.data) {
                     setFormData({
-                        name: response.data.data.name || "",         // ✅ add name
-                        description: response.data.data.description || "", // ✅ add description
+                        name: response.data.data.name || "",        
+                        description: response.data.data.description || "", 
                     });
 
                 } else {

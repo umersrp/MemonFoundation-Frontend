@@ -71,7 +71,7 @@ const SectorTable = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const response = await axios.get(`${process.env.REACT_APP_BASE_URL}/sector/Get-All`, {
+            const response = await axios.get(`${process.env.REACT_APP_BASE_URL}/user/getStudentByAdmin`, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
                 },
