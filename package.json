@@ -42,7 +42,7 @@
     "font-awesome": "^4.7.0",
     "framer-motion": "^10.12.12",
     "html2canvas": "^1.4.1",
-    "jspdf": "^2.5.1",
+    "jspdf": "^2.5.2",
     "leaflet": "^1.9.3",
     "localforage": "^1.10.0",
     "mapbox-gl": "^3.8.0",
