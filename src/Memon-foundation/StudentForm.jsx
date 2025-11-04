@@ -35,7 +35,7 @@ const steps = [
   { id: 7, title: "Declaration", section: "C", icon: "heroicons:clipboard-document-check" },
 ];
 
-const StudentRegistrationForm = () => {
+const StudentRegistrationForm2 = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState([]);
@@ -244,7 +244,7 @@ const StudentRegistrationForm = () => {
   // Step validation
   const validateStep = (step) => {
     const e = {};
-    
+
     switch (step) {
       case 1: // Personal Info
         if (!form.firstName) e.firstName = "First name required";
@@ -252,7 +252,7 @@ const StudentRegistrationForm = () => {
         if (!form.email) e.email = "Email required";
         if (!form.phone) e.phone = "Phone required";
         break;
-        
+
       case 2: // Academic Info
         if (!form.currentSchool) e.currentSchool = "Current school required";
         if (!form.gradeClass) e.gradeClass = "Grade/Class required";
@@ -266,23 +266,23 @@ const StudentRegistrationForm = () => {
           });
         }
         break;
-        
+
       case 3: // Family Info
         if (!form.father.firstName) e.fatherFirstName = "Father first name required";
         if (!form.mother.firstName) e.motherFirstName = "Mother first name required";
         break;
-        
+
       case 5: // Documents
         if (!files.birthCertificate || files.birthCertificate.length === 0) e.birthCertificate = "Upload birth certificate/B.form/CNIC";
         if (!files.last3Results || files.last3Results.length === 0) e.last3Results = "Upload last 3 years academic results";
         break;
-        
+
       case 7: // Declaration
         if (!form.declarationParentName) e.declarationParentName = "Parent/Guardian name required";
         if (!form.declarationDate) e.declarationDate = "Date required";
         break;
     }
-    
+
     return e;
   };
 
@@ -293,13 +293,12 @@ const StudentRegistrationForm = () => {
         {steps.map((step, index) => (
           <React.Fragment key={step.id}>
             <div className="flex flex-col items-center flex-1">
-              <div className={`flex items-center justify-center w-12 h-12 rounded-full border-2 ${
-                currentStep === step.id
+              <div className={`flex items-center justify-center w-12 h-12 rounded-full border-2 ${currentStep === step.id
                   ? "bg-blue-600 border-blue-600 text-white"
                   : completedSteps.includes(step.id)
-                  ? "bg-green-500 border-green-500 text-white"
-                  : "bg-white border-gray-300 text-gray-500"
-              }`}>
+                    ? "bg-green-500 border-green-500 text-white"
+                    : "bg-white border-gray-300 text-gray-500"
+                }`}>
                 {completedSteps.includes(step.id) ? (
                   <Icon icon="heroicons:check" className="w-6 h-6" />
                 ) : (
@@ -307,10 +306,9 @@ const StudentRegistrationForm = () => {
                 )}
               </div>
               <div className="mt-3 text-center">
-                <div className={`text-sm font-medium ${
-                  currentStep === step.id ? "text-blue-600" : 
-                  completedSteps.includes(step.id) ? "text-green-600" : "text-gray-500"
-                }`}>
+                <div className={`text-sm font-medium ${currentStep === step.id ? "text-blue-600" :
+                    completedSteps.includes(step.id) ? "text-green-600" : "text-gray-500"
+                  }`}>
                   {step.title}
                 </div>
                 <div className="text-xs text-gray-400 mt-1">
@@ -319,9 +317,8 @@ const StudentRegistrationForm = () => {
               </div>
             </div>
             {index < steps.length - 1 && (
-              <div className={`flex-1 h-1 mx-4 ${
-                completedSteps.includes(step.id) ? "bg-green-500" : "bg-gray-200"
-              }`} />
+              <div className={`flex-1 h-1 mx-4 ${completedSteps.includes(step.id) ? "bg-green-500" : "bg-gray-200"
+                }`} />
             )}
           </React.Fragment>
         ))}
@@ -340,11 +337,11 @@ const StudentRegistrationForm = () => {
   // Step 1: Personal Information (Redesigned)
   const Step1 = () => (
     <div className="max-w-4xl mx-auto">
-      <StepHeader 
-        title="Basic Information" 
+      <StepHeader
+        title="Basic Information"
         subtitle="Please provide your personal details"
       />
-      
+
       <Card className="border-0 shadow-lg">
         <div className="p-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -352,12 +349,11 @@ const StudentRegistrationForm = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 First Name *
               </label>
-              <input 
-                value={form.firstName} 
-                onChange={(e) => setField("firstName", e.target.value)} 
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.firstName ? "border-red-500" : "border-gray-300"
-                }`}
+              <input
+                value={form.firstName}
+                onChange={(e) => setField("firstName", e.target.value)}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.firstName ? "border-red-500" : "border-gray-300"
+                  }`}
                 placeholder="Enter your first name"
               />
               {errors.firstName && (
@@ -369,12 +365,11 @@ const StudentRegistrationForm = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Last Name *
               </label>
-              <input 
-                value={form.lastName} 
-                onChange={(e) => setField("lastName", e.target.value)} 
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.lastName ? "border-red-500" : "border-gray-300"
-                }`}
+              <input
+                value={form.lastName}
+                onChange={(e) => setField("lastName", e.target.value)}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.lastName ? "border-red-500" : "border-gray-300"
+                  }`}
                 placeholder="Enter your last name"
               />
               {errors.lastName && (
@@ -386,9 +381,9 @@ const StudentRegistrationForm = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Middle Name
               </label>
-              <input 
-                value={form.middleName} 
-                onChange={(e) => setField("middleName", e.target.value)} 
+              <input
+                value={form.middleName}
+                onChange={(e) => setField("middleName", e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter your middle name"
               />
@@ -400,6 +395,7 @@ const StudentRegistrationForm = () => {
               </label>
               <Select
                 options={[
+                  { value: "", label: "Select Gender" },
                   { value: "Male", label: "Male" },
                   { value: "Female", label: "Female" },
                   { value: "Other", label: "Other" },
@@ -416,10 +412,10 @@ const StudentRegistrationForm = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Date of Birth
               </label>
-              <input 
-                type="date" 
-                value={form.dob} 
-                onChange={(e) => setField("dob", e.target.value)} 
+              <input
+                type="date"
+                value={form.dob}
+                onChange={(e) => setField("dob", e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -430,25 +426,28 @@ const StudentRegistrationForm = () => {
               </label>
               <Select
                 options={countries.map((c) => ({ value: c, label: c }))}
-                value={form.nationality ? { value: form.nationality, label: form.nationality } : null}
+                value={
+                  form.nationality
+                    ? { value: form.nationality, label: form.nationality }
+                    : null
+                }
                 onChange={(s) => setField("nationality", s?.value || "")}
                 placeholder="Select Country"
-                className="react-select-container"
-                classNamePrefix="react-select"
+                isClearable
               />
+
             </div>
 
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Email Address *
               </label>
-              <input 
+              <input
                 type="email"
-                value={form.email} 
-                onChange={(e) => setField("email", e.target.value)} 
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.email ? "border-red-500" : "border-gray-300"
-                }`}
+                value={form.email}
+                onChange={(e) => setField("email", e.target.value)}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.email ? "border-red-500" : "border-gray-300"
+                  }`}
                 placeholder="Enter your email address"
               />
               {errors.email && (
@@ -460,12 +459,11 @@ const StudentRegistrationForm = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Mobile Phone *
               </label>
-              <input 
-                value={form.phone} 
-                onChange={(e) => setField("phone", e.target.value)} 
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.phone ? "border-red-500" : "border-gray-300"
-                }`}
+              <input
+                value={form.phone}
+                onChange={(e) => setField("phone", e.target.value)}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.phone ? "border-red-500" : "border-gray-300"
+                  }`}
                 placeholder="Enter your phone number"
               />
               {errors.phone && (
@@ -477,9 +475,9 @@ const StudentRegistrationForm = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Residential Address
               </label>
-              <input 
-                value={form.residentialAddress} 
-                onChange={(e) => setField("residentialAddress", e.target.value)} 
+              <input
+                value={form.residentialAddress}
+                onChange={(e) => setField("residentialAddress", e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter your residential address"
               />
@@ -491,21 +489,21 @@ const StudentRegistrationForm = () => {
               </label>
               <div className="flex gap-6">
                 <label className="flex items-center gap-3 cursor-pointer">
-                  <input 
-                    type="radio" 
-                    name="appliedOther" 
-                    checked={form.appliedOther === "yes"} 
-                    onChange={() => setField("appliedOther", "yes")} 
+                  <input
+                    type="radio"
+                    name="appliedOther"
+                    checked={form.appliedOther === "yes"}
+                    onChange={() => setField("appliedOther", "yes")}
                     className="w-4 h-4 text-blue-600 focus:ring-blue-500"
                   />
                   <span className="text-gray-700">Yes</span>
                 </label>
                 <label className="flex items-center gap-3 cursor-pointer">
-                  <input 
-                    type="radio" 
-                    name="appliedOther" 
-                    checked={form.appliedOther === "no"} 
-                    onChange={() => setField("appliedOther", "no")} 
+                  <input
+                    type="radio"
+                    name="appliedOther"
+                    checked={form.appliedOther === "no"}
+                    onChange={() => setField("appliedOther", "no")}
                     className="w-4 h-4 text-blue-600 focus:ring-blue-500"
                   />
                   <span className="text-gray-700">No</span>
@@ -518,10 +516,10 @@ const StudentRegistrationForm = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   If yes, give details
                 </label>
-                <input 
-                  type="text" 
-                  value={form.appliedDetails} 
-                  onChange={(e) => setField("appliedDetails", e.target.value)} 
+                <input
+                  type="text"
+                  value={form.appliedDetails}
+                  onChange={(e) => setField("appliedDetails", e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Provide details about other scholarships"
                 />
@@ -536,11 +534,11 @@ const StudentRegistrationForm = () => {
   // Step 2: Academic Information (Redesigned)
   const Step2 = () => (
     <div className="max-w-4xl mx-auto">
-      <StepHeader 
-        title="Academic Information" 
+      <StepHeader
+        title="Academic Information"
         subtitle="Provide your educational background and achievements"
       />
-      
+
       <Card className="border-0 shadow-lg">
         <div className="p-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -548,12 +546,11 @@ const StudentRegistrationForm = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Current School / College *
               </label>
-              <input 
-                value={form.currentSchool} 
-                onChange={(e) => setField("currentSchool", e.target.value)} 
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.currentSchool ? "border-red-500" : "border-gray-300"
-                }`}
+              <input
+                value={form.currentSchool}
+                onChange={(e) => setField("currentSchool", e.target.value)}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.currentSchool ? "border-red-500" : "border-gray-300"
+                  }`}
                 placeholder="Enter your current school/college"
               />
               {errors.currentSchool && (
@@ -565,12 +562,11 @@ const StudentRegistrationForm = () => {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Grade / Class *
               </label>
-              <input 
-                value={form.gradeClass} 
-                onChange={(e) => setField("gradeClass", e.target.value)} 
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.gradeClass ? "border-red-500" : "border-gray-300"
-                }`}
+              <input
+                value={form.gradeClass}
+                onChange={(e) => setField("gradeClass", e.target.value)}
+                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.gradeClass ? "border-red-500" : "border-gray-300"
+                  }`}
                 placeholder="Enter your grade/class"
               />
               {errors.gradeClass && (
@@ -611,115 +607,114 @@ const StudentRegistrationForm = () => {
 
   return (
     <Card>
-    <div className="relative">
-      {/* Modal: Guidelines */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full p-6 overflow-auto max-h-[85vh]">
-            <h3 className="text-xl font-bold mb-3">📘 Important Guidelines & Terms</h3>
-            <div className="text-sm leading-relaxed space-y-3 mb-4">
-              <p>Kindly read all instructions and questions before filling out the application.</p>
-              <ol className="list-decimal pl-5 space-y-1">
-                <li>The scholarship is offered for O Levels, A Levels and Grade XI, XII students of MEMF-approved schools & colleges based in Karachi only.</li>
-                <li>The application must be completed in English. Please write clearly.</li>
-                <li>Bring original documents on the day of the interview. Both parents must accompany the applicant.</li>
-                <li>Attach the required supporting documents (listed below).</li>
-                <li>By clicking "I Agree & Continue" you confirm that the information provided is correct and accept the Terms & Conditions.</li>
-              </ol>
+      <div className="relative">
+        {/* Modal: Guidelines */}
+        {showModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full p-6 overflow-auto max-h-[85vh]">
+              <h3 className="text-xl font-bold mb-3">📘 Important Guidelines & Terms</h3>
+              <div className="text-sm leading-relaxed space-y-3 mb-4">
+                <p>Kindly read all instructions and questions before filling out the application.</p>
+                <ol className="list-decimal pl-5 space-y-1">
+                  <li>The scholarship is offered for O Levels, A Levels and Grade XI, XII students of MEMF-approved schools & colleges based in Karachi only.</li>
+                  <li>The application must be completed in English. Please write clearly.</li>
+                  <li>Bring original documents on the day of the interview. Both parents must accompany the applicant.</li>
+                  <li>Attach the required supporting documents (listed below).</li>
+                  <li>By clicking "I Agree & Continue" you confirm that the information provided is correct and accept the Terms & Conditions.</li>
+                </ol>
 
-              <div className="mt-3">
-                <strong>Required documents (upload in the form):</strong>
-                <ul className="list-disc pl-5 mt-2">
-                  {requiredFilesList.map((f) => (
-                    <li key={f.key} className="text-sm">{f.label}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => navigate(-1)}
-                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => { setAgreed(true); setShowModal(false); }}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                I Agree & Continue
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Main form with modern stepper */}
-      {(agreed || !showModal) && (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                MEMON EDUCATION MONETARY FOUNDATION
-              </h1>
-              <p className="text-lg text-gray-600">
-                STAR SCHOLARSHIP (Session 2025–26)
-              </p>
-            </div>
-            
-            {/* Modern Stepper */}
-            <ModernStepper />
-            
-            <form onSubmit={handleSubmit}>
-              {/* Current Step Content */}
-              {renderStep()}
-
-              {/* Navigation Buttons */}
-              <div className="flex justify-between items-center mt-12 max-w-4xl mx-auto">
-                <button 
-                  type="button" 
-                  onClick={prevStep}
-                  disabled={currentStep === 1}
-                  className={`flex items-center gap-2 px-8 py-3 rounded-lg font-medium transition-colors ${
-                    currentStep === 1 
-                      ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
-                      : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 shadow-sm'
-                  }`}
-                >
-                  <Icon icon="heroicons:arrow-left" className="w-5 h-5" />
-                  Back
-                </button>
-                
-                <div className="flex gap-4">
-                  {currentStep < steps.length ? (
-                    <button 
-                      type="button" 
-                      onClick={nextStep}
-                      className="flex items-center gap-2 px-8 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm"
-                    >
-                      Next
-                      <Icon icon="heroicons:arrow-right" className="w-5 h-5" />
-                    </button>
-                  ) : (
-                    <Button 
-                      text={loading ? "Submitting..." : "Submit Application"} 
-                      isLoading={loading} 
-                      onClick={handleSubmit}
-                      className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium"
-                    />
-                  )}
+                <div className="mt-3">
+                  <strong>Required documents (upload in the form):</strong>
+                  <ul className="list-disc pl-5 mt-2">
+                    {requiredFilesList.map((f) => (
+                      <li key={f.key} className="text-sm">{f.label}</li>
+                    ))}
+                  </ul>
                 </div>
               </div>
-            </form>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => navigate(-1)}
+                  className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setAgreed(true); setShowModal(false); }}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  I Agree & Continue
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+
+        {/* Main form with modern stepper */}
+        {(agreed || !showModal) && (
+          <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+            <div className="max-w-6xl mx-auto">
+              <div className="text-center mb-8">
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  MEMON EDUCATION MONETARY FOUNDATION
+                </h1>
+                <p className="text-lg text-gray-600">
+                  STAR SCHOLARSHIP (Session 2025–26)
+                </p>
+              </div>
+
+              {/* Modern Stepper */}
+              <ModernStepper />
+
+              <form onSubmit={handleSubmit}>
+                {/* Current Step Content */}
+                {renderStep()}
+
+                {/* Navigation Buttons */}
+                <div className="flex justify-between items-center mt-12 max-w-4xl mx-auto">
+                  <button
+                    type="button"
+                    onClick={prevStep}
+                    disabled={currentStep === 1}
+                    className={`flex items-center gap-2 px-8 py-3 rounded-lg font-medium transition-colors ${currentStep === 1
+                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 shadow-sm'
+                      }`}
+                  >
+                    <Icon icon="heroicons:arrow-left" className="w-5 h-5" />
+                    Back
+                  </button>
+
+                  <div className="flex gap-4">
+                    {currentStep < steps.length ? (
+                      <button
+                        type="button"
+                        onClick={nextStep}
+                        className="flex items-center gap-2 px-8 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm"
+                      >
+                        Next
+                        <Icon icon="heroicons:arrow-right" className="w-5 h-5" />
+                      </button>
+                    ) : (
+                      <Button
+                        text={loading ? "Submitting..." : "Submit Application"}
+                        isLoading={loading}
+                        onClick={handleSubmit}
+                        className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium"
+                      />
+                    )}
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
     </Card>
   );
 };
 
-export default StudentRegistrationForm;
+export default StudentRegistrationForm2;

@@ -233,11 +233,11 @@ const OfficeInfoModal = ({ isOpen, onClose, studentId, studentData }) => {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-blue-900/20 backdrop-blur-sm p-4">
             <button
-                        onClick={onClose}
-                        className="text-gray-500 hover:text-gray-700"
-                    >
-                        <Icon icon="heroicons:x-mark" className="w-6 h-6" />
-                    </button>
+                onClick={onClose}
+                className="text-gray-500 hover:text-gray-700"
+            >
+                <Icon icon="heroicons:x-mark" className="w-6 h-6" />
+            </button>
             <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[70vh] overflow-auto">
                 <div className="flex items-center justify-between p-6 border-b">
                     <h3 className="text-xl font-bold">
@@ -711,11 +711,11 @@ const StudentTable = () => {
                 return <span>{flatRows.indexOf(row) + 1}</span>;
             },
         },
-        {
-            Header: "username",
-            accessor: "username",
-            Cell: (row) => <span>{row?.cell?.value}</span>,
-        },
+        // {
+        //     Header: "username",
+        //     accessor: "username",
+        //     Cell: (row) => <span>{row?.cell?.value}</span>,
+        // },
         {
             Header: "Name",
             accessor: "name",

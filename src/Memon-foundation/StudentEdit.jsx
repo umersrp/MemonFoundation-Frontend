@@ -4,55 +4,36 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import Card from "@/components/ui/Card";
-import Textinput from "@/components/ui/Textinput";
-import Select from "react-select";
 import Button from "@/components/ui/Button";
 
 const StudentEdit = () => {
     const navigate = useNavigate();
     const { id } = useParams();
-    const [formData, setFormData] = useState({
-        // ... other fields ...
-
-        // Office Use Information
-        officeUseInfo: {
-            jamaatName: "",
-            membershipNumber: "",
-            belongsToJamaat: "None",
-            supportProvided: "No Support",
-            zakatDeserving: false,
-            authorizedSignature: {
-                name: "",
-                designation: "",
-                stamp: ""
-            },
-            channelOfSubmission: "",
-            memfOffice: {  // Ensure this exists in initial state
-                studentCode: "",
-                assessmentDate: "",
-                interviewDate: "",
-                decision: "Hold",
-                category: "SEED",
-                scholarship: {
-                    grantedFor: [],
-                    totalAmount: 0
-                },
-                panelComments: "",
-                reviewPanelSignature: {
-                    name: "",
-                    designation: "",
-                    stamp: ""
-                }
-            }
-        }
-    });
-
     const [loading, setLoading] = useState(false);
+    const [uploadingData, setUploadingData] = useState(false);
+    const [docUploading, setDocUploading] = useState(false);
     const [error, setError] = useState("");
     const user = useSelector((state) => state.auth.user);
 
+    const [formData, setFormData] = useState({
+        username: "",
+        name: "",
+        email: "",
+        phone: "",
+        image: "",
+        isActive: false,
+        selectionNote: "",
+        numberOfHouseholdMembers: 0,
+        financialInformation: {
+            numberOfEarningMembers: 0,
+            earningMemberRelations: [],
+            totalMonthlyIncome: 0,
+        },
+    });
+
+    // 🔹 Fetch existing student
     useEffect(() => {
-        const fetchStudentById = async () => {
+        const fetchStudent = async () => {
             try {
                 setLoading(true);
                 const response = await axios.get(
@@ -64,87 +45,54 @@ const StudentEdit = () => {
                     }
                 );
 
-                if (response.data) {
-                    const studentData = response.data.data;
-
-                    // Safe access for all nested objects
-                    const financialInfo = studentData.financialInformation || {};
-                    const officeUseInfo = studentData.officeUseInfo || {};
-
-                    setFormData({
-                        username: studentData.username || "",
-                        name: studentData.name || "",
-                        email: studentData.email || "",
-                        phone: studentData.phone || "",
-                        type: studentData.type || "student",
-                        isActive: studentData.isActive || false,
-                        image: studentData.image || "",
-                        academicRecords: studentData.academicRecords || [],
-                        extracurricularActivities: studentData.extracurricularActivities || [],
-                        selectionNote: studentData.selectionNote || "",
-                        familyMembers: studentData.familyMembers || [],
-                        numberOfHouseholdMembers: studentData.numberOfHouseholdMembers || 0,
-                        financialInformation: {
-                            numberOfEarningMembers: financialInfo.numberOfEarningMembers || 0,
-                            earningMemberRelations: financialInfo.earningMemberRelations || [],
-                            totalMonthlyIncome: financialInfo.totalMonthlyIncome || 0
-                        },
-                        officeUseInfo: {
-                            jamaatName: officeUseInfo.jamaatName || "",
-                            membershipNumber: officeUseInfo.membershipNumber || "",
-                            belongsToJamaat: officeUseInfo.belongsToJamaat || "None",
-                            supportProvided: officeUseInfo.supportProvided || "No Support",
-                            zakatDeserving: officeUseInfo.zakatDeserving || false,
-                            authorizedSignature: officeUseInfo.authorizedSignature || {
-                                name: "",
-                                designation: "",
-                                stamp: ""
-                            },
-                            channelOfSubmission: officeUseInfo.channelOfSubmission || "",
-                            memfOffice: officeUseInfo.memfOffice || {
-                                studentCode: "",
-                                assessmentDate: "",
-                                interviewDate: "",
-                                decision: "Hold",
-                                category: "SEED",
-                                scholarship: {
-                                    grantedFor: [],
-                                    totalAmount: 0
-                                },
-                                panelComments: "",
-                                reviewPanelSignature: {
-                                    name: "",
-                                    designation: "",
-                                    stamp: ""
-                                }
-                            }
-                        }
-                    });
-                } else {
-                    setError("Student not found");
+                const student = response.data?.data;
+                if (!student) {
+                    toast.error("Student not found");
+                    return;
                 }
+
+                setFormData({
+                    username: student.username || "",
+                    name: student.name || "",
+                    email: student.email || "",
+                    phone: student.phone || "",
+                    isActive: student.isActive || false,
+                    image: student.image || "",
+                    selectionNote: student.selectionNote || "",
+                    numberOfHouseholdMembers: student.numberOfHouseholdMembers || 0,
+                    financialInformation: {
+                        numberOfEarningMembers:
+                            student.financialInformation?.numberOfEarningMembers || 0,
+                        earningMemberRelations:
+                            student.financialInformation?.earningMemberRelations || [],
+                        totalMonthlyIncome:
+                            student.financialInformation?.totalMonthlyIncome || 0,
+                    },
+                });
             } catch (err) {
-                setError("Failed to fetch student data");
-                console.error(err);
+                console.error("❌ Fetch Error:", err);
+                setError("Failed to load student data");
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchStudentById();
+        fetchStudent();
     }, [id]);
 
+    // 🔹 Handle input change
     const handleInputChange = (path, value) => {
         if (!path.includes(".")) {
-            setFormData(prev => ({ ...prev, [path]: value }));
+            setFormData((prev) => ({ ...prev, [path]: value }));
             return;
         }
 
         const parts = path.split(".");
-        setFormData(prev => {
-            const copy = JSON.parse(JSON.stringify(prev));
+        setFormData((prev) => {
+            const copy = { ...prev };
             let cur = copy;
             for (let i = 0; i < parts.length - 1; i++) {
+                cur[parts[i]] = cur[parts[i]] || {};
                 cur = cur[parts[i]];
             }
             cur[parts[parts.length - 1]] = value;
@@ -152,27 +100,83 @@ const StudentEdit = () => {
         });
     };
 
+    // 🔹 Handle file upload
+    // 🔹 Handle File Upload
+    const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const uploadData = new FormData();
+        uploadData.append("documentFile", file);
+
+        try {
+            setDocUploading(true);
+
+            const res = await axios.post(
+                `${process.env.REACT_APP_BASE_URL}/upload/upload`,
+                uploadData,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                }
+            );
+
+            console.log("📸 Upload response:", res.data);
+
+            // ✅ since your API returns the file URL in res.data.data
+            const imageUrl = res.data?.data;
+
+            if (!imageUrl) {
+                toast.error("Upload failed — no file URL returned");
+                return;
+            }
+
+            // ✅ save URL to formData.image
+            setFormData((prev) => ({ ...prev, image: imageUrl }));
+            toast.success("Image uploaded successfully");
+        } catch (err) {
+            console.error("Upload error:", err);
+            toast.error("File upload failed");
+        } finally {
+            setDocUploading(false);
+        }
+    };
+
+
+    // 🔹 Handle Submit (PUT update)
     const handleSubmit = async (e) => {
         e.preventDefault();
-        try {
-            setLoading(true);
+        setUploadingData(true);
 
-            const submitData = {
+        try {
+            // 🔸 Ensure image exists before updating
+            if (!formData.image) {
+                toast.warning("Please upload an image before submitting");
+                setUploadingData(false);
+                return;
+            }
+
+            // ✅ Prepare payload
+            const payload = {
                 username: formData.username,
                 name: formData.name,
                 email: formData.email,
                 phone: formData.phone,
+                image: formData.image, // 👈 make sure uploaded image URL is here
                 isActive: formData.isActive,
-                image: formData.image,
                 selectionNote: formData.selectionNote,
                 numberOfHouseholdMembers: formData.numberOfHouseholdMembers,
                 financialInformation: formData.financialInformation,
-                officeUseInfo: formData.officeUseInfo
             };
 
-            await axios.put(
+            console.log("🧾 Submitting payload:", payload);
+
+            // ✅ Update API
+            const res = await axios.put(
                 `${process.env.REACT_APP_BASE_URL}/user/student-update/${id}`,
-                submitData,
+                payload,
                 {
                     headers: {
                         "Content-Type": "application/json",
@@ -181,199 +185,200 @@ const StudentEdit = () => {
                 }
             );
 
-            toast.success("Student updated successfully");
-            navigate("/Student");
+            console.log("✅ Update response:", res.data);
+
+            if (res.data?.status === 200 || res.status === 200) {
+                toast.success("Student updated successfully!");
+                navigate("/Student");
+            } else {
+                toast.error(res.data?.message || "Unexpected response from server.");
+            }
         } catch (err) {
-            toast.error("Failed to update student");
-            console.error(err);
+            console.error("❌ Update Error:", err);
+            toast.error(
+                err.response?.data?.message || "Failed to update student information."
+            );
         } finally {
-            setLoading(false);
+            setUploadingData(false);
         }
     };
 
-    const handleCancel = () => {
-        navigate("/Student");
-    };
 
-    if (loading) return <div className="flex justify-center items-center py-8">Loading...</div>;
-    if (error) return <div className="text-red-500 text-center py-4">{error}</div>;
+    const handleCancel = () => navigate("/Student");
+
+    // 🔹 Loading/Error UI
+    if (loading && !formData.username)
+        return <div className="text-center py-8">Loading...</div>;
+    if (error)
+        return <div className="text-center text-red-600 py-4">{error}</div>;
 
     return (
         <Card title="Edit Student Information">
-        <div className="max-w-full mx-auto p-6">
-           
+            <div className="p-6 max-w-3xl mx-auto">
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Basic Information */}
+                    {/* Basic Info */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium mb-2">Username</label>
                             <input
                                 type="text"
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 value={formData.username}
                                 onChange={(e) => handleInputChange("username", e.target.value)}
+                                className="w-full border rounded-md px-3 py-2"
                             />
                         </div>
-
                         <div>
                             <label className="block text-sm font-medium mb-2">Full Name</label>
                             <input
                                 type="text"
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 value={formData.name}
                                 onChange={(e) => handleInputChange("name", e.target.value)}
+                                className="w-full border rounded-md px-3 py-2"
                             />
                         </div>
-
                         <div>
                             <label className="block text-sm font-medium mb-2">Email</label>
                             <input
                                 type="email"
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 value={formData.email}
                                 onChange={(e) => handleInputChange("email", e.target.value)}
+                                className="w-full border rounded-md px-3 py-2"
                             />
                         </div>
-
                         <div>
                             <label className="block text-sm font-medium mb-2">Phone</label>
                             <input
                                 type="text"
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 value={formData.phone}
                                 onChange={(e) => handleInputChange("phone", e.target.value)}
+                                className="w-full border rounded-md px-3 py-2"
                             />
                         </div>
                     </div>
 
-                    {/* Account Status */}
-                    <div className="flex items-center gap-3">
+                    {/* Active Checkbox */}
+                    <div className="flex items-center gap-2">
                         <input
                             type="checkbox"
                             id="isActive"
                             checked={formData.isActive}
                             onChange={(e) => handleInputChange("isActive", e.target.checked)}
-                            className="w-4 h-4"
                         />
-                        <label htmlFor="isActive" className="text-sm font-medium">
+                        <label htmlFor="isActive" className="text-sm">
                             Active Account
                         </label>
                     </div>
 
                     {/* Selection Note */}
                     <div>
-                        <label className="block text-sm font-medium mb-2">Selection Note</label>
+                        <label className="block text-sm font-medium mb-2">
+                            Selection Note
+                        </label>
                         <textarea
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             rows="3"
                             value={formData.selectionNote}
-                            onChange={(e) => handleInputChange("selectionNote", e.target.value)}
-                            placeholder="Additional notes or comments..."
+                            onChange={(e) =>
+                                handleInputChange("selectionNote", e.target.value)
+                            }
+                            className="w-full border rounded-md px-3 py-2"
                         />
                     </div>
 
-                    {/* Household Information */}
+                    {/* Household Info */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium mb-2">Number of Household Members</label>
+                            <label className="block text-sm font-medium mb-2">
+                                Number of Household Members
+                            </label>
                             <input
                                 type="number"
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 value={formData.numberOfHouseholdMembers}
-                                onChange={(e) => handleInputChange("numberOfHouseholdMembers", parseInt(e.target.value) || 0)}
+                                onChange={(e) =>
+                                    handleInputChange(
+                                        "numberOfHouseholdMembers",
+                                        parseInt(e.target.value) || 0
+                                    )
+                                }
+                                className="w-full border rounded-md px-3 py-2"
                             />
                         </div>
-
                         <div>
-                            <label className="block text-sm font-medium mb-2">Total Monthly Income</label>
+                            <label className="block text-sm font-medium mb-2">
+                                Total Monthly Income
+                            </label>
                             <input
                                 type="number"
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                value={formData.financialInformation?.totalMonthlyIncome || 0}
-                                onChange={(e) => handleInputChange("financialInformation.totalMonthlyIncome", parseInt(e.target.value) || 0)}
+                                value={formData.financialInformation.totalMonthlyIncome}
+                                onChange={(e) =>
+                                    handleInputChange(
+                                        "financialInformation.totalMonthlyIncome",
+                                        parseInt(e.target.value) || 0
+                                    )
+                                }
+                                className="w-full border rounded-md px-3 py-2"
                             />
                         </div>
                     </div>
 
-                    {/* Office Use Information */}
-                    <div className="border-t pt-6">
-                        <h3 className="text-lg font-semibold mb-4">Office Use Information</h3>
+                    {/* Upload File */}
+                    <div>
+                        <label className="block text-sm font-medium mb-2">
+                            Upload Student Image / Document
+                        </label>
+                        <input
+                            type="file"
+                            accept="image/*,application/pdf"
+                            onChange={handleFileUpload}
+                            className="w-full border rounded-md px-3 py-2"
+                            disabled={docUploading}
+                        />
+                        {docUploading && (
+                            <p className="text-blue-600 text-sm mt-1">Uploading...</p>
+                        )}
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Jamaat Name</label>
-                                <input
-                                    type="text"
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    value={formData.officeUseInfo.jamaatName}
-                                    onChange={(e) => handleInputChange("officeUseInfo.jamaatName", e.target.value)}
-                                />
+                        {formData.image && (
+                            <div className="mt-3">
+                                <p className="text-green-600 text-sm">Uploaded File:</p>
+                                <a
+                                    href={formData.image}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 underline break-all"
+                                >
+                                    {formData.image}
+                                </a>
+                                {formData.image.match(/\.(jpg|jpeg|png|gif)$/i) && (
+                                    <div className="mt-2">
+                                        <img
+                                            src={formData.image}
+                                            alt="Student"
+                                            className="w-32 h-32 rounded-md border object-cover"
+                                        />
+                                    </div>
+                                )}
                             </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Membership Number</label>
-                                <input
-                                    type="text"
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    value={formData.officeUseInfo.membershipNumber}
-                                    onChange={(e) => handleInputChange("officeUseInfo.membershipNumber", e.target.value)}
-                                />
-                            </div>
-
-                            {/* <div>
-                                <label className="block text-sm font-medium mb-2">Student Code</label>
-                                <input
-                                    type="text"
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    value={formData.officeUseInfo.memfOffice.studentCode}
-                                    onChange={(e) => handleInputChange("officeUseInfo.memfOffice.studentCode", e.target.value)}
-                                />
-                            </div> */}
-
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Total Scholarship Amount</label>
-                                <input
-                                    type="number"
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    value={formData.officeUseInfo.memfOffice?.scholarship?.totalAmount || 0}
-                                    onChange={(e) => handleInputChange("officeUseInfo.memfOffice.scholarship.totalAmount", parseInt(e.target.value) || 0)}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Panel Comments */}
-                        <div className="mt-4">
-                            <label className="block text-sm font-medium mb-2">Panel Comments</label>
-                            <textarea
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                rows="3"
-                                value={formData.officeUseInfo.memfOffice.panelComments}
-                                onChange={(e) => handleInputChange("officeUseInfo.memfOffice.panelComments", e.target.value)}
-                                placeholder="Panel comments and recommendations..."
-                            />
-                        </div>
+                        )}
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex justify-end gap-3 pt-6 border-t">
+                    {/* Buttons */}
+                    <div className="flex justify-end gap-3 border-t pt-4">
                         <button
                             type="button"
                             onClick={handleCancel}
-                            className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                            className="px-5 py-2 border rounded-md"
                         >
                             Cancel
                         </button>
                         <Button
                             type="submit"
-                            text={loading ? "Updating..." : "Update Student"}
-                            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                            isLoading={loading}
-                            disabled={loading}
+                            text={uploadingData ? "Updating..." : "Update Student"}
+                            className="bg-blue-600 text-white px-5 py-2 rounded-md"
+                            disabled={uploadingData}
                         />
                     </div>
                 </form>
-        </div>
-    </Card>
+            </div>
+        </Card>
     );
 };
 

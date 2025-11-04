@@ -210,6 +210,7 @@ import StudentRegistrationForm from "./Memon-foundation/RegisterForm";
 import Installment from "./Memon-foundation/Installment/InstallemntTable";
 import StudentEdit from "./Memon-foundation/StudentEdit";
 import StudentView from "./Memon-foundation/StudentView";
+import StudentRegistrationForm2 from "./Memon-foundation/StudentForm";
 
 
 function App() {
@@ -419,7 +420,7 @@ function App() {
           <Route path="Coach-edit" element={<CoachEditPage />} />
           <Route path="*" element={<Navigate to="/404" />} />
         </Route>
-        <Route path="Registration" element={<StudentRegistrationForm />} />
+        <Route path="Registration" element={<StudentRegistrationForm2 />} />
 
         <Route
           path="/404"

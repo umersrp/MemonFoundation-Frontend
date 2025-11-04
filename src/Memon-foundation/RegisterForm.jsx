@@ -274,12 +274,12 @@ const StudentRegistrationForm = () => {
             },
         };
 
-        // Client-side validation
+        // 🧩 Client-side validation
         const v = validate();
         if (Object.keys(v).length > 0) {
             setErrors(v);
             window.scrollTo({ top: 0, behavior: "smooth" });
-            toast.error("Please fix the errors before submitting.");
+            // ❌ Removed toast.error("Please fix the errors before submitting.");
             return;
         }
 
@@ -293,6 +293,7 @@ const StudentRegistrationForm = () => {
 
             if (response.status === 200 || response.status === 201) {
                 toast.success("Application submitted successfully!");
+                navigate("/Student");
             } else {
                 toast.error("Unexpected response from server.");
             }
@@ -303,6 +304,7 @@ const StudentRegistrationForm = () => {
             setLoading(false);
         }
     };
+
 
     return (
         <div className="relative">
@@ -358,37 +360,33 @@ const StudentRegistrationForm = () => {
                                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                                             <div>
                                                 <label className="block text-sm font-medium">First Name *</label>
-                                                <input name="firstName" value={form.firstName} onChange={(e) => setField("firstName", e.target.value)} className={`mt-1 w-full border rounded p-2 ${errors.firstName ? "border-red-500" : "border-gray-300"}`} />
+                                                <input name="firstName" value={form.firstName} placeholder="Enter Name" onChange={(e) => setField("firstName", e.target.value)} className={`mt-1 w-full border rounded p-2 ${errors.firstName ? "border-red-500" : "border-gray-300"}`} />
                                                 {errors.firstName && <p className="text-red-500 text-sm">{errors.firstName}</p>}
                                             </div>
 
                                             <div>
                                                 <label className="block text-sm font-medium">Middle Name</label>
-                                                <input name="middleName" value={form.middleName} onChange={(e) => setField("middleName", e.target.value)} className="mt-1 w-full border rounded p-2 border-gray-300" />
+                                                <input name="middleName" value={form.middleName} placeholder="Middle Name" onChange={(e) => setField("middleName", e.target.value)} className="mt-1 w-full border rounded p-2 border-gray-300" />
                                             </div>
-
                                             <div>
                                                 <label className="block text-sm font-medium">Last Name *</label>
-                                                <input name="lastName" value={form.lastName} onChange={(e) => setField("lastName", e.target.value)} className={`mt-1 w-full border rounded p-2 ${errors.lastName ? "border-red-500" : "border-gray-300"}`} />
+                                                <input name="lastName" value={form.lastName} placeholder="Enter Last Name" onChange={(e) => setField("lastName", e.target.value)} className={`mt-1 w-full border rounded p-2 ${errors.lastName ? "border-red-500" : "border-gray-300"}`} />
                                                 {errors.lastName && <p className="text-red-500 text-sm">{errors.lastName}</p>}
                                             </div>
 
                                             <div>
                                                 <label className="block text-sm font-medium mb-1">Gender</label>
-                                                <Select
-                                                    options={[
-                                                        { value: "Male", label: "Male" },
-                                                        { value: "Female", label: "Female" },
-                                                        { value: "Other", label: "Other" },
-                                                    ]}
-                                                    value={
-                                                        form.gender
-                                                            ? { value: form.gender, label: form.gender }
-                                                            : null
-                                                    }
-                                                    onChange={(selected) => setField("gender", selected?.value || "")}
-                                                    placeholder="Select Gender"
-                                                />
+                                                <select
+                                                    className="mt-1 w-full border rounded p-2 border-gray-300"
+                                                    value={form.gender || ""}
+                                                    onChange={(e) => setField("gender", e.target.value)}
+                                                >
+                                                    <option value="">Select Gender</option>
+                                                    <option value="Male">Male</option>
+                                                    <option value="Female">Female</option>
+                                                    <option value="Other">Other</option>
+                                                </select>
+
                                             </div>
 
                                             <div>
@@ -398,42 +396,79 @@ const StudentRegistrationForm = () => {
 
                                             <div>
                                                 <label className="block text-sm font-medium">Nationality</label>
-                                                <Select
-                                                    options={countries.map((c) => ({ value: c, label: c }))}
-                                                    value={form.nationality ? { value: form.nationality, label: form.nationality } : null}
-                                                    onChange={(s) => setField("nationality", s?.value || "")}
-                                                    placeholder="Select Country"
-                                                />
+                                                <select
+                                                    className="mt-1 w-full border rounded p-2 border-gray-300"
+                                                    value={form.nationality || ""}
+                                                    onChange={(e) => setField("nationality", e.target.value)}
+                                                >
+                                                    <option value="">Select Country</option>
+                                                    {countries.map((c, idx) => (
+                                                        <option key={idx} value={c}>{c}</option>
+                                                    ))}
+                                                </select>
+
                                             </div>
 
                                             <div className="lg:col-span-3">
-                                                <label className="block text-sm font-medium">Have you applied for other scholarships?</label>
+                                                <label className="block text-sm font-medium">Have you applied for any other scholarships?</label>
                                                 <div className="mt-1 flex gap-4">
-                                                    <label className="flex items-center gap-2"><input type="radio" name="appliedOther" checked={form.appliedOther === "yes"} onChange={() => setField("appliedOther", "yes")} /> Yes</label>
-                                                    <label className="flex items-center gap-2"><input type="radio" name="appliedOther" checked={form.appliedOther === "no"} onChange={() => setField("appliedOther", "no")} /> No</label>
+                                                    <label className="flex items-center gap-2">
+                                                        <input
+                                                            type="radio"
+                                                            name="appliedOther"
+                                                            checked={form.appliedOther === "yes"}
+                                                            onChange={() => setField("appliedOther", "yes")}
+                                                        />
+                                                        Yes
+                                                    </label>
+                                                    <label className="flex items-center gap-2">
+                                                        <input
+                                                            type="radio"
+                                                            name="appliedOther"
+                                                            checked={form.appliedOther === "no"}
+                                                            onChange={() => setField("appliedOther", "no")}
+                                                        />
+                                                        No
+                                                    </label>
                                                 </div>
                                             </div>
 
                                             <div className="lg:col-span-3">
-                                                <label className="block text-sm font-medium">If yes, give details</label>
-                                                <input type="text" value={form.appliedDetails} onChange={(e) => setField("appliedDetails", e.target.value)} className="mt-1 w-full border rounded p-2 border-gray-300" />
+                                                <label className="block text-sm font-medium">
+                                                    If yes, then please give the details of the scholarships.
+                                                    {form.appliedOther === "yes" && <span className="text-red-500"> *</span>}
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={form.appliedDetails}
+                                                    onChange={(e) => setField("appliedDetails", e.target.value)}
+                                                    className={`mt-1 w-full border rounded p-2 ${form.appliedOther === "yes" && errors.appliedDetails ? "border-red-500" : "border-gray-300"}`}
+                                                />
+                                                {form.appliedOther === "yes" && errors.appliedDetails && (
+                                                    <p className="text-red-500 text-sm">{errors.appliedDetails}</p>
+                                                )}
                                             </div>
 
                                             <div>
-                                                <label className="block text-sm font-medium">Current School / College *</label>
+                                                <label className="block text-sm font-medium">Current School/College Name *</label>
                                                 <input value={form.currentSchool} onChange={(e) => setField("currentSchool", e.target.value)} className={`mt-1 w-full border rounded p-2 ${errors.currentSchool ? "border-red-500" : "border-gray-300"}`} />
-                                                {errors.currentSchool && <p className="text-red-500 text-sm">{errors.currentSchool}</p>}
+                                                {errors.currentSchool && <p className="text-red-500 text-sm">Current School Required</p>}
                                             </div>
 
                                             <div>
-                                                <label className="block text-sm font-medium">School / College Address</label>
-                                                <input value={form.schoolAddress} onChange={(e) => setField("schoolAddress", e.target.value)} className="mt-1 w-full border rounded p-2 border-gray-300" />
+                                                <label className="block text-sm font-medium">School/College Address</label>
+                                                <textarea
+                                                    value={form.schoolAddress}
+                                                    onChange={(e) => setField("schoolAddress", e.target.value)}
+                                                    rows={3}
+                                                    className="mt-1 w-full border rounded p-2 border-gray-300"
+                                                />
                                             </div>
 
                                             <div>
-                                                <label className="block text-sm font-medium">Grade / Class *</label>
+                                                <label className="block text-sm font-medium">Grade/Class *</label>
                                                 <input value={form.gradeClass} onChange={(e) => setField("gradeClass", e.target.value)} className={`mt-1 w-full border rounded p-2 ${errors.gradeClass ? "border-red-500" : "border-gray-300"}`} />
-                                                {errors.gradeClass && <p className="text-red-500 text-sm">{errors.gradeClass}</p>}
+                                                {errors.gradeClass && <p className="text-red-500 text-sm">Grade/Class required</p>}
                                             </div>
 
                                             <div>
@@ -441,135 +476,217 @@ const StudentRegistrationForm = () => {
                                                 <input type="number" value={form.monthlyFee} onChange={(e) => setField("monthlyFee", e.target.value)} className="mt-1 w-full border rounded p-2 border-gray-300" />
                                             </div>
 
-                                            <div>
-                                                <label className="block text-sm font-medium">Which college / why?</label>
-                                                <input value={form.plannedCollege} onChange={(e) => setField("plannedCollege", e.target.value)} className="mt-1 w-full border rounded p-2 border-gray-300" />
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-sm font-medium mb-1">Examination Board</label>
-                                                <Select
-                                                    options={[
-                                                        { value: "National", label: "National" },
-                                                        { value: "International", label: "International" },
-                                                    ]}
-                                                    value={
-                                                        form.examinationBoard
-                                                            ? { value: form.examinationBoard, label: form.examinationBoard }
-                                                            : null
-                                                    }
-                                                    onChange={(selected) => setField("examinationBoard", selected?.value || "")}
-                                                    placeholder="Select Examination Board"
+                                            <div className="lg:col-span-3">
+                                                <label className="block text-sm font-medium">
+                                                    Which college/school are you planning to apply to and why? (Write N/A if in case of not applicable) *
+                                                </label>
+                                                <input
+                                                    value={form.plannedCollege}
+                                                    onChange={(e) => setField("plannedCollege", e.target.value)}
+                                                    className={`mt-1 w-full border rounded p-2 ${errors.plannedCollege ? "border-red-500" : "border-gray-300"}`}
                                                 />
+                                                {errors.plannedCollege && <p className="text-red-500 text-sm">{errors.plannedCollege}</p>}
                                             </div>
 
-                                            <div>
+                                            <div className="lg:col-span-3">
+                                                <label className="block text-sm font-medium mb-1">Examination Board *</label>
+                                                <div className="mt-1 flex gap-6">
+                                                    <label className="flex items-center gap-2">
+                                                        <input
+                                                            type="radio"
+                                                            name="examinationBoard"
+                                                            checked={form.examinationBoard === "National"}
+                                                            onChange={(e) => setField("examinationBoard", "National")}
+                                                            className="rounded"
+                                                        />
+                                                        National
+                                                    </label>
+                                                    <label className="flex items-center gap-2">
+                                                        <input
+                                                            type="radio"
+                                                            name="examinationBoard"
+                                                            checked={form.examinationBoard === "International"}
+                                                            onChange={(e) => setField("examinationBoard", "International")}
+                                                            className="rounded"
+                                                        />
+                                                        International
+                                                    </label>
+                                                </div>
+                                                {errors.examinationBoard && <p className="text-red-500 text-sm">{errors.examinationBoard}</p>}
+                                            </div>
+
+                                            <div className="lg:col-span-3">
                                                 <label className="block text-sm font-medium">Residential Address</label>
-                                                <input value={form.residentialAddress} onChange={(e) => setField("residentialAddress", e.target.value)} className="mt-1 w-full border rounded p-2 border-gray-300" />
+                                                <textarea
+                                                    value={form.residentialAddress}
+                                                    onChange={(e) => setField("residentialAddress", e.target.value)}
+                                                    rows={3}
+                                                    className="mt-1 w-full border rounded p-2 border-gray-300"
+                                                />
                                             </div>
 
                                             <div>
                                                 <label className="block text-sm font-medium">Mobile Phone *</label>
                                                 <input value={form.phone} onChange={(e) => setField("phone", e.target.value)} className={`mt-1 w-full border rounded p-2 ${errors.phone ? "border-red-500" : "border-gray-300"}`} />
-                                                {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
+                                                {errors.phone && <p className="text-red-500 text-sm">Phone required</p>}
                                             </div>
 
                                             <div>
                                                 <label className="block text-sm font-medium">Email Address *</label>
                                                 <input value={form.email} onChange={(e) => setField("email", e.target.value)} className={`mt-1 w-full border rounded p-2 ${errors.email ? "border-red-500" : "border-gray-300"}`} />
-                                                {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+                                                {errors.email && <p className="text-red-500 text-sm">Email is required</p>}
                                             </div>
                                         </div>
 
                                         {/* Previous Academic Records */}
                                         <div className="mt-6">
-                                            <h5 className="font-medium mb-2">Previous Academic Record (up to 3)</h5>
+                                            <h5 className="font-medium mb-2">Previous Academic Record</h5>
                                             {form.academicRecords.map((rec, idx) => (
-                                                <div key={idx} className="grid grid-cols-1 md:grid-cols-6 gap-3 items-end mb-2">
+                                                <div key={idx} className="grid grid-cols-1 md:grid-cols-6 gap-3 items-end mb-4 p-4 border rounded-lg bg-gray-50">
                                                     <div>
-                                                        <label className="text-sm">Class</label>
-                                                        <input value={rec.class} onChange={(e) => setField(`academicRecords[${idx}].class`, e.target.value)} className="mt-1 w-full border rounded p-2 border-gray-300" />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-sm font-medium mb-1">Stream</label>
-                                                        <Select
-                                                            options={[
-                                                                { value: "Science", label: "Science" },
-                                                                { value: "Commerce", label: "Commerce" },
-                                                                { value: "Arts", label: "Arts" },
-                                                                { value: "Other", label: "Other" },
-                                                            ]}
-                                                            isClearable={false} // 🚫 prevents user from clearing selection
-                                                            value={
-                                                                rec.stream
-                                                                    ? { value: rec.stream, label: rec.stream }
-                                                                    : { value: "Other", label: "Other" } // fallback display
-                                                            }
-                                                            onChange={(selected) =>
-                                                                setField(`academicRecords[${idx}].stream`, selected?.value || "Other")
-                                                            }
-                                                            placeholder="Select Stream"
+                                                        <label className="text-sm">Class *</label>
+                                                        <input
+                                                            value={rec.class || ''}
+                                                            onChange={(e) => setField(`academicRecords[${idx}].class`, e.target.value)}
+                                                            className={`mt-1 w-full border rounded p-2 ${errors.academicRecords?.[idx]?.class ? "border-red-500" : "border-gray-300"}`}
                                                         />
+                                                        {errors.academicRecords?.[idx]?.class && (
+                                                            <p className="text-red-500 text-sm">{errors.academicRecords[idx].class}</p>
+                                                        )}
                                                     </div>
                                                     <div>
-                                                        <label className="text-sm">Name of School</label>
-                                                        <input value={rec.schoolName} onChange={(e) => setField(`academicRecords[${idx}].schoolName`, e.target.value)} className="mt-1 w-full border rounded p-2 border-gray-300" />
+                                                        <label className="block text-sm font-medium mb-1">Stream *</label>
+                                                        <select
+                                                            className="mt-1 w-full border rounded p-2 border-gray-300"
+                                                            value={rec.stream || ""}
+                                                            onChange={(e) => setField(`academicRecords[${idx}].stream`, e.target.value)}
+                                                        >
+                                                            <option value="">Select Stream</option>
+                                                            <option value="Science">Science</option>
+                                                            <option value="Commerce">Commerce</option>
+                                                            <option value="Arts">Arts</option>
+                                                            <option value="Other">Other</option>
+                                                        </select>
+
+                                                        {errors.academicRecords?.[idx]?.stream && (
+                                                            <p className="text-red-500 text-sm">{errors.academicRecords[idx].stream}</p>
+                                                        )}
                                                     </div>
                                                     <div>
-                                                        <label className="text-sm">Year of Passing</label>
-                                                        <input value={rec.yearOfPassing} onChange={(e) => setField(`academicRecords[${idx}].yearOfPassing`, e.target.value)} className="mt-1 w-full border rounded p-2 border-gray-300" />
+                                                        <label className="text-sm">Name of School *</label>
+                                                        <input
+                                                            value={rec.schoolName || ''}
+                                                            onChange={(e) => setField(`academicRecords[${idx}].schoolName`, e.target.value)}
+                                                            className={`mt-1 w-full border rounded p-2 ${errors.academicRecords?.[idx]?.schoolName ? "border-red-500" : "border-gray-300"}`}
+                                                        />
+                                                        {errors.academicRecords?.[idx]?.schoolName && (
+                                                            <p className="text-red-500 text-sm">{errors.academicRecords[idx].schoolName}</p>
+                                                        )}
                                                     </div>
                                                     <div>
-                                                        <label className="text-sm">Grade / Percentage</label>
-                                                        <input value={rec.gradeOrPercentage} onChange={(e) => setField(`academicRecords[${idx}].gradeOrPercentage`, e.target.value)} className="mt-1 w-full border rounded p-2 border-gray-300" />
+                                                        <label className="text-sm">Year of Passing *</label>
+                                                        <input
+                                                            value={rec.yearOfPassing || ''}
+                                                            onChange={(e) => setField(`academicRecords[${idx}].yearOfPassing`, e.target.value)}
+                                                            className={`mt-1 w-full border rounded p-2 ${errors.academicRecords?.[idx]?.yearOfPassing ? "border-red-500" : "border-gray-300"}`}
+                                                        />
+                                                        {errors.academicRecords?.[idx]?.yearOfPassing && (
+                                                            <p className="text-red-500 text-sm">{errors.academicRecords[idx].yearOfPassing}</p>
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-sm">Grade/Percentage *</label>
+                                                        <input
+                                                            value={rec.gradeOrPercentage || ''}
+                                                            onChange={(e) => setField(`academicRecords[${idx}].gradeOrPercentage`, e.target.value)}
+                                                            className={`mt-1 w-full border rounded p-2 ${errors.academicRecords?.[idx]?.gradeOrPercentage ? "border-red-500" : "border-gray-300"}`}
+                                                        />
+                                                        {errors.academicRecords?.[idx]?.gradeOrPercentage && (
+                                                            <p className="text-red-500 text-sm">{errors.academicRecords[idx].gradeOrPercentage}</p>
+                                                        )}
                                                     </div>
                                                     <div className="flex gap-2">
                                                         {form.academicRecords.length > 1 && (
                                                             <button type="button" onClick={() => removeAcademicRecord(idx)} className="btn btn-light">Remove</button>
                                                         )}
-                                                        {idx === form.academicRecords.length - 1 && form.academicRecords.length < 3 && (
+                                                        {idx === form.academicRecords.length - 1 && (
                                                             <button type="button" onClick={addAcademicRecord} className="btn btn-primary">Add</button>
                                                         )}
                                                     </div>
-                                                    {errors[`academicRecords[${idx}]`] && <p className="text-red-500 text-sm col-span-6">{errors[`academicRecords[${idx}]`]}</p>}
                                                 </div>
                                             ))}
                                         </div>
-                                        <div className="mt-12">
-                                            <label className="block text-sm font-medium">Position achieved, if any, in the School / Board.</label>
-                                            <input value={form.schoolAddress} onChange={(e) => setField("schoolAddress", e.target.value)} className="mt-1 w-full border rounded p-2 border-gray-300" />
+
+                                        <div className="mt-6">
+                                            <label className="block text-sm font-medium">Position achieved, if any, in the School/Board.</label>
+                                            <input value={form.schoolPosition || ''} onChange={(e) => setField("schoolPosition", e.target.value)} className="mt-1 w-full border rounded p-2 border-gray-300" />
                                         </div>
 
                                         {/* Extracurricular Activities */}
                                         <div className="mt-6">
-                                            <h5 className="font-medium mb-2">Extracurricular Activities (up to 3)</h5>
+                                            <h5 className="font-medium mb-2">Extracurricular Activities</h5>
+                                            <p className="text-sm text-gray-600 mb-4">List your extracurricular activities, roles, time commitment, and any certificates received.</p>
+
                                             {form.extracurricularActivities.map((ex, i) => (
-                                                <div key={i} className="grid grid-cols-1 md:grid-cols-6 gap-3 items-end mb-2">
+                                                <div key={i} className="grid grid-cols-1 md:grid-cols-6 gap-3 items-end mb-4 p-4 border rounded-lg bg-gray-50">
                                                     <div>
-                                                        <label className="text-sm">Activity</label>
-                                                        <input value={ex.activityName} onChange={(e) => setField(`extracurricularActivities[${i}].activityName`, e.target.value)} className="mt-1 w-full border rounded p-2 border-gray-300" />
+                                                        <label className="text-sm">Activity *</label>
+                                                        <input
+                                                            value={ex.activityName || ''}
+                                                            onChange={(e) => setField(`extracurricularActivities[${i}].activityName`, e.target.value)}
+                                                            className={`mt-1 w-full border rounded p-2 ${errors.extracurricularActivities?.[i]?.activityName ? "border-red-500" : "border-gray-300"}`}
+                                                        />
+                                                        {errors.extracurricularActivities?.[i]?.activityName && (
+                                                            <p className="text-red-500 text-sm">{errors.extracurricularActivities[i].activityName}</p>
+                                                        )}
                                                     </div>
                                                     <div>
-                                                        <label className="text-sm">Your Role</label>
-                                                        <input value={ex.role} onChange={(e) => setField(`extracurricularActivities[${i}].role`, e.target.value)} className="mt-1 w-full border rounded p-2 border-gray-300" />
+                                                        <label className="text-sm">Your Role *</label>
+                                                        <input
+                                                            value={ex.role || ''}
+                                                            onChange={(e) => setField(`extracurricularActivities[${i}].role`, e.target.value)}
+                                                            className={`mt-1 w-full border rounded p-2 ${errors.extracurricularActivities?.[i]?.role ? "border-red-500" : "border-gray-300"}`}
+                                                        />
+                                                        {errors.extracurricularActivities?.[i]?.role && (
+                                                            <p className="text-red-500 text-sm">{errors.extracurricularActivities[i].role}</p>
+                                                        )}
                                                     </div>
                                                     <div>
-                                                        <label className="text-sm">Time Spent / Week</label>
-                                                        <input value={ex.timespent} onChange={(e) => setField(`extracurricularActivities[${i}].timespent`, e.target.value)} className="mt-1 w-full border rounded p-2 border-gray-300" />
+                                                        <label className="text-sm">Time Spent/Week *</label>
+                                                        <input
+                                                            value={ex.timespent || ''}
+                                                            onChange={(e) => setField(`extracurricularActivities[${i}].timespent`, e.target.value)}
+                                                            className={`mt-1 w-full border rounded p-2 ${errors.extracurricularActivities?.[i]?.timespent ? "border-red-500" : "border-gray-300"}`}
+                                                        />
+                                                        {errors.extracurricularActivities?.[i]?.timespent && (
+                                                            <p className="text-red-500 text-sm">{errors.extracurricularActivities[i].timespent}</p>
+                                                        )}
                                                     </div>
                                                     <div>
-                                                        <label className="text-sm">How long (yrs)</label>
-                                                        <input value={ex.beeninvoled} onChange={(e) => setField(`extracurricularActivities[${i}].beeninvoled`, e.target.value)} className="mt-1 w-full border rounded p-2 border-gray-300" />
+                                                        <label className="text-sm">How Long (yrs) *</label>
+                                                        <input
+                                                            value={ex.beeninvoled || ''}
+                                                            onChange={(e) => setField(`extracurricularActivities[${i}].beeninvoled`, e.target.value)}
+                                                            className={`mt-1 w-full border rounded p-2 ${errors.extracurricularActivities?.[i]?.beeninvoled ? "border-red-500" : "border-gray-300"}`}
+                                                        />
+                                                        {errors.extracurricularActivities?.[i]?.beeninvoled && (
+                                                            <p className="text-red-500 text-sm">{errors.extracurricularActivities[i].beeninvoled}</p>
+                                                        )}
                                                     </div>
                                                     <div>
-                                                        <label className="text-sm">Received Certificate?</label>
-                                                        <input value={ex.reciveCertificates} onChange={(e) => setField(`extracurricularActivities[${i}].reciveCertificates`, e.target.value)} className="mt-1 w-full border rounded p-2 border-gray-300" placeholder="Yes/No or name of certificate" />
+                                                        <label className="text-sm">Received Certificate</label>
+                                                        <input
+                                                            value={ex.reciveCertificates || ''}
+                                                            onChange={(e) => setField(`extracurricularActivities[${i}].reciveCertificates`, e.target.value)}
+                                                            className="mt-1 w-full border rounded p-2 border-gray-300"
+                                                            placeholder="Yes/No or name of certificate"
+                                                        />
                                                     </div>
                                                     <div className="flex gap-2">
                                                         {form.extracurricularActivities.length > 1 && (
                                                             <button type="button" onClick={() => removeExtracurricular(i)} className="btn btn-light">Remove</button>
                                                         )}
-                                                        {i === form.extracurricularActivities.length - 1 && form.extracurricularActivities.length < 3 && (
+                                                        {i === form.extracurricularActivities.length - 1 && (
                                                             <button type="button" onClick={addExtracurricular} className="btn btn-primary">Add</button>
                                                         )}
                                                     </div>
@@ -579,11 +696,10 @@ const StudentRegistrationForm = () => {
 
                                         <div className="mt-4">
                                             <label className="block text-sm font-medium">Which field of study would you like to pursue and why?</label>
-                                            <textarea value={form.selectionNote} onChange={(e) => setField("selectionNote", e.target.value)} rows={3} className="mt-1 w-full border rounded p-2 border-gray-300" />
+                                            <textarea value={form.selectionNote || ''} onChange={(e) => setField("selectionNote", e.target.value)} rows={3} className="mt-1 w-full border rounded p-2 border-gray-300" />
                                         </div>
                                     </div>
                                 </Card>
-
                                 {/* SECTION B: FAMILY */}
                                 <Card title={"SECTION B: FAMILY INFORMATION"} >
                                     {/* <div className="bg-black p-3 mb-3 card-header ">
@@ -736,7 +852,7 @@ const StudentRegistrationForm = () => {
                                 {/* Submit Buttons */}
                                 <div className="flex justify-end gap-3">
                                     <button type="button" onClick={() => navigate(-1)} className="px-4 py-2 rounded border">Cancel</button>
-                                    <Button text={loading ? "Submitting..." : "Submit Application"} isLoading={loading} type="submit" />
+                                    <Button className="btn btn-primary" text={loading ? "Submitting..." : "Submit Application"} isLoading={loading} type="submit" />
                                 </div>
 
                             </form>
