@@ -28,8 +28,7 @@ jobs:
             set -ex
 
             echo "Navigating to frontend directory..."
-            cd /repos/CarbonX-Frontend
-
+            cd /repos/MemonFoundation-Frontend
             echo "Pulling latest changes..."
             git remote set-url origin git@github.com:umersrp/MemonFoundation-Frontend.git
             git fetch origin
