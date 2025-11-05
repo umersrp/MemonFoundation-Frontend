@@ -1,4 +1,4 @@
-name: Deploy Frontend
+name: Deploy React App
 
 on:
   push:
@@ -11,31 +11,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: SSH into EC2 and Deploy
+      - name: 🚀 Deploy to EC2
         uses: appleboy/ssh-action@v1.1.0
         with:
-          host: ${{ secrets.EC2_HOST_MAIN}}
+          host: ${{ secrets.EC2_HOST_MAIN }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # Navigate to project directory based on branch
             if [[ "${{ github.ref_name }}" == "main" ]]; then
-              echo "Deploying to Production"
+              echo "Deploying Production Build..."
               cd /repos/MemonFoundation-Frontend
-            elif [[ "${{ github.ref_name }}" == "dev" ]]; then
-              echo "Deploying to Development"
-              cd /repos/MemonFoundation-Frontend 
+              DEPLOY_DIR=/var/www/html/prod
+            else
+              echo "Deploying Development Build..."
+              cd /repos/MemonFoundation-Frontend
+              DEPLOY_DIR=/var/www/html/dev
             fi
 
-            echo "Pulling Latest Code"
+            echo "Pulling latest changes..."
+            git fetch origin
+            git checkout ${{ github.ref_name }}
             git pull origin ${{ github.ref_name }}
 
-            echo "Install Packages & Build"
-            npm install --no-legacy --force
+            echo "Installing dependencies..."
+            npm install --force
+
+            echo "Building React app..."
             npm run build
 
-            # Copy built files to the appropriate directory
-            if [[ "${{ github.ref_name }}" == "main" ]]; then
-              cp -r dist /var/www/html/prod
-            elif [[ "${{ github.ref_name }}" == "dev" ]]; then
-              cp -r dist /var/www/html/dev
-            fi
+            echo "Deploying build to $DEPLOY_DIR"
+            sudo rm -rf $DEPLOY_DIR
+            sudo mkdir -p $DEPLOY_DIR
+            sudo cp -r dist/* $DEPLOY_DIR/
+
+            echo "✅ Deployment complete!"
