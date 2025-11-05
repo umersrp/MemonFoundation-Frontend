@@ -1,65 +1,41 @@
-name: Deploy Next.js Frontend
+name: Deploy Frontend
+
 on:
   push:
     branches:
       - main
       - dev
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: SSH into EC2 and Deploy
         uses: appleboy/ssh-action@v1.1.0
         with:
-          host: ${{ secrets.EC2_HOST_MAIN }}
+          host: ${{ secrets.EC2_HOST_MAIN}}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Determine environment and settings
             if [[ "${{ github.ref_name }}" == "main" ]]; then
-              echo ":rocket: Deploying to Production"
-              APP_DIR="/home/ubuntu/repos/MemonFoundation-Frontend"
-              PM2_APP_NAME="MemonFoundation-Frontend"
-              PORT=3100
+              echo "Deploying to Production"
+              cd /repos/MemonFoundation-Frontend
             elif [[ "${{ github.ref_name }}" == "dev" ]]; then
-              echo ":wrench: Deploying to Development"
-              APP_DIR="/home/ubuntu/repos/MemonFoundation-Frontend"
-              PM2_APP_NAME="MemonFoundation-Frontend"
-              PORT=3100
+              echo "Deploying to Development"
+              cd /repos/MemonFoundation-Frontend 
             fi
-            # Create app directory if it doesn't exist
-            mkdir -p $APP_DIR
-            cd $APP_DIR
-            # Clone repo if it doesn't exist, otherwise pull
-            if [ ! -d ".git" ]; then
-              echo ":package: Cloning repository..."
-              git clone -b ${{ github.ref_name }} git@github.com:umersrp/MemonFoundation-Frontend.git .
-            else
-              echo ":arrow_down: Pulling latest code..."
-              git fetch origin
-              git reset --hard origin/${{ github.ref_name }}
-            fi
-            # Install dependencies
-            echo "Installing dependencies..."
-            npm install --legacy-peer-deps -f
-            # Build the React.js
-            echo "Building React application..."
+
+            echo "Pulling Latest Code"
+            git pull origin ${{ github.ref_name }}
+
+            echo "Install Packages & Build"
+            npm install --no-legacy --force
             npm run build
-            # Environment variables should already exist in .env file
-            # Just ensure PORT is set for 
-            export PORT=$PORT
-            export NODE_ENV=production
-            # Install PM2 globally if not already installed
-            if ! command -v pm2 &> /dev/null; then
-              echo "Installing PM2..."
-              sudo npm install -g pm2
+
+            # Copy built files to the appropriate directory
+            if [[ "${{ github.ref_name }}" == "main" ]]; then
+              cp -r dist /var/www/html/prod
+            elif [[ "${{ github.ref_name }}" == "dev" ]]; then
+              cp -r dist /var/www/html/dev
             fi
-            # Start or restart the application with PM2
-            echo "Starting application with PM2..."
-            pm2 delete $PM2_APP_NAME 2>/dev/null || true
-            pm2 start npm --name $PM2_APP_NAME -- start -- -p $PORT
-            pm2 save
-            # Ensure PM2 starts on system reboot
-            sudo env PATH=$PATH:/usr/bin pm2 startup systemd -u ubuntu --hp /home/ubuntu || true
-            echo "Deployment complete!"
-            pm2 status
