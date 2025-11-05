@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  memonfrontend:
+    build: .
+    container_name: memonfrontend
+    restart: always
+    ports:
+      - "3001:80"
+    environment:
+      - NODE_ENV=development
