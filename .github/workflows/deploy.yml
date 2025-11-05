@@ -1,37 +1,65 @@
-name: Deploy to EC2 (Main Only)
+name: Deploy Next.js Frontend
 on:
   push:
     branches:
       - main
+      - dev
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Setup SSH agent
-        uses: webfactory/ssh-agent@v0.7.0
+      - name: SSH into EC2 and Deploy
+        uses: appleboy/ssh-action@v1.1.0
         with:
-          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
-      - name: Deploy to EC2 (main)
-        env:
-          EC2_HOST_MAIN: ${{ secrets.EC2_HOST_MAIN }}
-        run: |
-          echo "Connecting to EC2 and deploying carbon-backend..."
-          ssh -o StrictHostKeyChecking=no ec2-user@$EC2_HOST_MAIN << 'EOF'
-            set -ex
-            echo "Navigating to project directory..."
-            cd /repos/MemonFoundation-Frontend
-            echo "Pulling latest changes using SSH..."
-            git remote set-url origin git@github.com:umersrp/MemonFoundation-Frontend.git
-            git fetch origin
-            git reset --hard origin/main
-            echo "Stopping and removing existing containers..."
-            docker compose down
-            echo "Cleaning up unused Docker resources..."
-            docker system prune -f
-            docker volume prune -f
-            echo "Rebuilding and starting containers with .env..."
-            docker compose up --build -d
-            echo "Deployment completed successfully!"
-          EOF
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # Determine environment and settings
+            if [[ "${{ github.ref_name }}" == "main" ]]; then
+              echo ":rocket: Deploying to Production"
+              APP_DIR="/home/ubuntu/repos/MemonFoundation-Frontend"
+              PM2_APP_NAME="MemonFoundation-Frontend"
+              PORT=3100
+            elif [[ "${{ github.ref_name }}" == "dev" ]]; then
+              echo ":wrench: Deploying to Development"
+              APP_DIR="/home/ubuntu/repos/MemonFoundation-Frontend"
+              PM2_APP_NAME="MemonFoundation-Frontend"
+              PORT=3100
+            fi
+            # Create app directory if it doesn't exist
+            mkdir -p $APP_DIR
+            cd $APP_DIR
+            # Clone repo if it doesn't exist, otherwise pull
+            if [ ! -d ".git" ]; then
+              echo ":package: Cloning repository..."
+              git clone -b ${{ github.ref_name }} git@github.com:umersrp/MemonFoundation-Frontend.git .
+            else
+              echo ":arrow_down: Pulling latest code..."
+              git fetch origin
+              git reset --hard origin/${{ github.ref_name }}
+            fi
+            # Install dependencies
+            echo "Installing dependencies..."
+            npm install --legacy-peer-deps -f
+            # Build the React.js
+            echo "Building React application..."
+            npm run build
+            # Environment variables should already exist in .env file
+            # Just ensure PORT is set for 
+            export PORT=$PORT
+            export NODE_ENV=production
+            # Install PM2 globally if not already installed
+            if ! command -v pm2 &> /dev/null; then
+              echo "Installing PM2..."
+              sudo npm install -g pm2
+            fi
+            # Start or restart the application with PM2
+            echo "Starting application with PM2..."
+            pm2 delete $PM2_APP_NAME 2>/dev/null || true
+            pm2 start npm --name $PM2_APP_NAME -- start -- -p $PORT
+            pm2 save
+            # Ensure PM2 starts on system reboot
+            sudo env PATH=$PATH:/usr/bin pm2 startup systemd -u ubuntu --hp /home/ubuntu || true
+            echo "Deployment complete!"
+            pm2 status
