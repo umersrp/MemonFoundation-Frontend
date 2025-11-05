@@ -24,7 +24,7 @@ jobs:
         run: |
           echo "Connecting to EC2 and deploying MemonFoundation-Frontend ..."
 
-          ssh -o StrictHostKeyChecking=no ubuntu@$EC2_HOST_MAIN << 'EOF'
+          ssh -o StrictHostKeyChecking=no ec2-user@$EC2_HOST_MAIN << 'EOF'
             set -ex
 
             echo "Navigating to frontend directory..."
