@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   memonfrontend:
     build: .
@@ -8,4 +6,4 @@ services:
     ports:
       - "3001:80"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
