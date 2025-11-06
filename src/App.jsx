@@ -77,7 +77,6 @@ const TanstackTable = lazy(() => import("./pages/table/react-table"));
 // utility pages
 const UserPage = lazy(() => import("./pages/utility/userTable"));
 const UserAddPage = lazy(() => import("./pages/utility/user-add"));
-const UserEditPage = lazy(() => import("./pages/utility/user-edit"));
 const VendorAddPage = lazy(() => import("./pages/utility/vendor-add"));
 const VendorEditPage = lazy(() => import("./pages/utility/vendor-edit"));
 const InvoicePreviewPage = lazy(() =>
@@ -302,7 +301,6 @@ function App() {
           <Route path="Customer" element={<UserPage />} />
           <Route path="vendor" element={<VendorPage />} />
           <Route path="Customers-add" element={<UserAddPage />} />
-          <Route path="Customer-edit" element={<UserEditPage />} />
           <Route path="vendor-add" element={<VendorAddPage />} />
           <Route path="vendor-edit" element={<VendorEditPage />} />
           <Route path="add-player" element={<RoleAddPage />} />
