@@ -3,12 +3,21 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+<<<<<<< HEAD
   "scripts": {
     "dev": "vite",
     "build": "NODE_OPTIONS=--max_old_space_size=8192 vite build",
     "preview": "vite preview",
     "start": "vite preview"
   },
+=======
+ "scripts": {
+  "dev": "vite",
+  "build": "NODE_OPTIONS=--max_old_space_size=8192 vite build",
+   "preview": "vite preview",
+  "start": "vite preview"
+},
+>>>>>>> acc5a9f28bb0d3b63e3d54c5e06a686f746a885b
   "dependencies": {
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",

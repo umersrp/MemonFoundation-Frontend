@@ -1,37 +1,52 @@
-name: Deploy to EC2 (Main Only)
+name: Deploy Frontend to EC2 (Main Only)
+
 on:
   push:
     branches:
       - main
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
       - name: Setup SSH agent
         uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
-      - name: Deploy to EC2 (main)
+
+      - name: Deploy React Frontend to EC2
         env:
           EC2_HOST_MAIN: ${{ secrets.EC2_HOST_MAIN }}
         run: |
-          echo "Connecting to EC2 and deploying carbon-backend..."
+          echo "Connecting to EC2 and deploying MemonFoundation-Frontend ..."
+
           ssh -o StrictHostKeyChecking=no ec2-user@$EC2_HOST_MAIN << 'EOF'
             set -ex
-            echo "Navigating to project directory..."
+
+            echo "Navigating to frontend directory..."
             cd /repos/MemonFoundation-Frontend
-            echo "Pulling latest changes using SSH..."
+            echo "Pulling latest changes..."
             git remote set-url origin git@github.com:umersrp/MemonFoundation-Frontend.git
             git fetch origin
             git reset --hard origin/main
-            echo "Stopping and removing existing containers..."
-            docker compose down
-            echo "Cleaning up unused Docker resources..."
-            docker system prune -f
-            docker volume prune -f
-            echo "Rebuilding and starting containers with .env..."
-            docker compose up --build -d
-            echo "Deployment completed successfully!"
+
+            echo "Installing dependencies..."
+            npm install --force
+
+            echo "Building React app..."
+            npm run build
+
+            echo "Deploying build to /var/www/html/MemonFoundation-Frontend"
+            sudo rm -rf /var/www/html/MemonFoundation-Frontend
+            sudo mkdir -p /var/www/html/MemonFoundation-Frontend
+            sudo cp -r dist/* /var/www/html/MemonFoundation-Frontend/
+
+            echo "Restarting Nginx..."
+            sudo systemctl restart nginx
+
+            echo "✅ Frontend deployment completed successfully!"
           EOF
